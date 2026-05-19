@@ -62,13 +62,20 @@ async def ver(request: Request, id_reserva: int):
         else:
             tipo = "OUT"
 
-    # Estado de cada sección OPR
-    tiene_conductor   = bool(query("SELECT 1 FROM conductores  WHERE IdReserva=?", [id_reserva]))
-    tiene_adicionales = bool(query("SELECT 1 FROM adicionales  WHERE IdReserva=?", [id_reserva]))
-    tiene_pagos       = bool(query("SELECT 1 FROM pagos        WHERE IdReserva=?", [id_reserva]))
-    tiene_entrega     = bool(query("SELECT 1 FROM entregas     WHERE IdReserva=?", [id_reserva]))
-    tiene_recepcion   = bool(query("SELECT 1 FROM recepciones  WHERE IdReserva=?", [id_reserva]))
-    tiene_firma       = bool(query("SELECT 1 FROM firmas       WHERE IdReserva=?", [id_reserva]))
+    # Datos de cada sección OPR (una sola query por sección)
+    _cond  = query("SELECT * FROM conductores  WHERE IdReserva=?", [id_reserva])
+    _adic  = query("SELECT * FROM adicionales  WHERE IdReserva=?", [id_reserva])
+    _pagos = query("SELECT * FROM pagos        WHERE IdReserva=? ORDER BY FechaPago, Id", [id_reserva])
+    _ent   = query("SELECT * FROM entregas     WHERE IdReserva=?", [id_reserva])
+    _rec   = query("SELECT * FROM recepciones  WHERE IdReserva=?", [id_reserva])
+    _firma = query("SELECT * FROM firmas       WHERE IdReserva=?", [id_reserva])
+
+    tiene_conductor   = bool(_cond)
+    tiene_adicionales = bool(_adic)
+    tiene_pagos       = bool(_pagos)
+    tiene_entrega     = bool(_ent)
+    tiene_recepcion   = bool(_rec)
+    tiene_firma       = bool(_firma)
 
     contrato_listo = (
         tipo == "OUT"
@@ -91,6 +98,12 @@ async def ver(request: Request, id_reserva: int):
         "tiene_firma":       tiene_firma,
         "contrato_listo":    contrato_listo,
         "ya_enviado":        ya_enviado,
+        "conductor_data":    _cond[0]  if _cond  else None,
+        "adicional_data":    _adic[0]  if _adic  else None,
+        "pagos_data":        _pagos,
+        "entrega_data":      _ent[0]   if _ent   else None,
+        "recepcion_data":    _rec[0]   if _rec   else None,
+        "firma_data":        _firma[0] if _firma  else None,
         "ok":                request.query_params.get("ok"),
         "active_tab":        "hojas",
     })

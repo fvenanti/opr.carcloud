@@ -129,4 +129,139 @@
   {{ fila('Abonada', reserva.Abonada) }}
 </div>
 
+<!-- ── Subforms de secciones OPR ─────────────────────────────────────── -->
+{% macro sf_fila(label, valor) %}
+{% if valor is not none and valor != '' and valor != 0 %}
+<div class="px-4 py-2.5">
+  <p class="text-xs text-gray-400 uppercase tracking-wide mb-0.5">{{ label }}</p>
+  <p class="text-sm text-gray-900">{{ valor }}</p>
+</div>
+{% endif %}
+{% endmacro %}
+
+{% macro yn(val) %}{{ 'SI' if val else 'NO' }}{% endmacro %}
+
+{% macro subform_header(title, href, badge='') %}
+<button type="button" @click="open = !open"
+        class="w-full flex items-center justify-between bg-white border border-gray-100 rounded-2xl px-4 py-3 shadow-sm">
+  <span class="text-sm font-semibold text-gray-800">{{ title }}</span>
+  <div class="flex items-center gap-2">
+    {% if badge %}<span class="text-xs bg-gray-100 text-gray-600 rounded-full px-2 py-0.5 font-semibold">{{ badge }}</span>{% endif %}
+    <a href="{{ href }}" @click.stop
+       class="text-xs text-green-600 font-medium px-2 py-1 rounded-lg bg-green-50">Editar</a>
+    <svg class="w-4 h-4 text-gray-400 transition-transform" :class="open && 'rotate-180'"
+         fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+    </svg>
+  </div>
+</button>
+{% endmacro %}
+
+{% if conductor_data %}
+<div class="mx-4 mb-3" x-data="{ open: false }">
+  {{ subform_header('Conductor Principal', '/planilla/' ~ reserva.IdReserva ~ '/conductor') }}
+  <div x-show="open" x-collapse class="bg-white border border-t-0 border-gray-100 rounded-b-2xl divide-y divide-gray-50 -mt-1">
+    {{ sf_fila('Nombre', conductor_data.Nombre ~ ' ' ~ (conductor_data.Apellido or '')) }}
+    {{ sf_fila('DNI', (conductor_data.DniTipo or '') ~ ' ' ~ (conductor_data.DniNumero or '')) }}
+    {{ sf_fila('Teléfono', conductor_data.Telefono) }}
+    {{ sf_fila('Mail', conductor_data.Mail) }}
+    {{ sf_fila('Domicilio', conductor_data.Domicilio) }}
+    {{ sf_fila('Licencia N°', conductor_data.NumeroLicencia) }}
+    {{ sf_fila('Vencimiento Licencia', conductor_data.VencimientoLicencia) }}
+    {{ sf_fila('Emitida por', conductor_data.EmitidaPor) }}
+    {{ sf_fila('Categoría', conductor_data.Categoria) }}
+  </div>
+</div>
+{% endif %}
+
+{% if adicional_data %}
+<div class="mx-4 mb-3" x-data="{ open: false }">
+  {{ subform_header('Datos de la Reserva', '/planilla/' ~ reserva.IdReserva ~ '/adicionales') }}
+  <div x-show="open" x-collapse class="bg-white border border-t-0 border-gray-100 rounded-b-2xl divide-y divide-gray-50 -mt-1">
+    {{ sf_fila('Fecha Devolución', adicional_data.FechaDevolucion) }}
+    {{ sf_fila('Hora Devolución', adicional_data.HoraDevolucion) }}
+    {{ sf_fila('Lugar Devolución', adicional_data.LugarDevolucion) }}
+    {{ sf_fila('Domicilio Provisorio', adicional_data.DomicilioProvisorio) }}
+    {% if adicional_data.Conductor1 %}
+      {{ sf_fila('Conductor Adicional 1', adicional_data.Conductor1) }}
+      {{ sf_fila('Licencia 1', adicional_data.Licencia1) }}
+      {{ sf_fila('Vencimiento 1', adicional_data.Vencimiento1) }}
+    {% endif %}
+    {% if adicional_data.Conductor2 %}
+      {{ sf_fila('Conductor Adicional 2', adicional_data.Conductor2) }}
+      {{ sf_fila('Licencia 2', adicional_data.Licencia2) }}
+      {{ sf_fila('Vencimiento 2', adicional_data.Vencimiento2) }}
+    {% endif %}
+    {% if adicional_data.NumTarjetaGarantia %}
+      {{ sf_fila('Tarjeta Garantía', adicional_data.NumTarjetaGarantia) }}
+      {{ sf_fila('Venc. Tarjeta', adicional_data.VencimientoTarjeta) }}
+    {% endif %}
+    {% if adicional_data.GarantiaEfectivo %}
+      {{ sf_fila('Garantía Efectivo', adicional_data.GarantiaEfectivo ~ ' ' ~ (adicional_data.GarantiaMoneda or '')) }}
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+{% if pagos_data %}
+<div class="mx-4 mb-3" x-data="{ open: false }">
+  {{ subform_header('Pagos', '/planilla/' ~ reserva.IdReserva ~ '/pagos', pagos_data | length) }}
+  <div x-show="open" x-collapse class="bg-white border border-t-0 border-gray-100 rounded-b-2xl -mt-1">
+    {% for p in pagos_data %}
+    <div class="px-4 py-2.5 {% if not loop.last %}border-b border-gray-50{% endif %}">
+      <div class="flex justify-between items-center">
+        <span class="text-sm font-medium text-gray-900">{{ p.Importe }} {{ p.Moneda }}</span>
+        <span class="text-xs text-gray-400">{{ p.FechaPago }}</span>
+      </div>
+      <p class="text-xs text-gray-500 mt-0.5">{{ p.TipoPago }}{% if p.Concepto %} — {{ p.Concepto }}{% endif %}</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if entrega_data %}
+<div class="mx-4 mb-3" x-data="{ open: false }">
+  {{ subform_header('Datos del Vehículo a la Entrega', '/planilla/' ~ reserva.IdReserva ~ '/entregas') }}
+  <div x-show="open" x-collapse class="bg-white border border-t-0 border-gray-100 rounded-b-2xl divide-y divide-gray-50 -mt-1">
+    {{ sf_fila('Km Salida', entrega_data.KmSalida) }}
+    {{ sf_fila('Nafta Salida', entrega_data.NaftaSalida) }}
+    {{ sf_fila('Auxilio', yn(entrega_data.Auxilio)) }}
+    {{ sf_fila('Silla Bebé', entrega_data.SillaBebe) }}
+    {{ sf_fila('Cadenas', yn(entrega_data.Cadenas)) }}
+    {{ sf_fila('GPS', yn(entrega_data.GPS)) }}
+    {{ sf_fila('Barras', yn(entrega_data.Barras)) }}
+    {{ sf_fila('Permiso Chile', yn(entrega_data.PermisoChile)) }}
+    {{ sf_fila('Kit Seguridad', yn(entrega_data.KitSeg)) }}
+    {{ sf_fila('Observaciones', entrega_data.Observaciones) }}
+  </div>
+</div>
+{% endif %}
+
+{% if recepcion_data %}
+<div class="mx-4 mb-3" x-data="{ open: false }">
+  {{ subform_header('Recepción del Vehículo', '/planilla/' ~ reserva.IdReserva ~ '/recepcion') }}
+  <div x-show="open" x-collapse class="bg-white border border-t-0 border-gray-100 rounded-b-2xl divide-y divide-gray-50 -mt-1">
+    {{ sf_fila('Km Entrada', recepcion_data.KmEntrada) }}
+    {{ sf_fila('Nafta Entrada', recepcion_data.NaftaEntrada) }}
+    {{ sf_fila('Observaciones', recepcion_data.Observaciones) }}
+  </div>
+</div>
+{% endif %}
+
+{% if firma_data %}
+<div class="mx-4 mb-3" x-data="{ open: false }">
+  {{ subform_header('Firma de Contrato', '/planilla/' ~ reserva.IdReserva ~ '/firmas') }}
+  <div x-show="open" x-collapse class="bg-white border border-t-0 border-gray-100 rounded-b-2xl divide-y divide-gray-50 -mt-1">
+    {{ sf_fila('Aclaración', firma_data.Aclaracion) }}
+    {% if firma_data.FirmaImagen %}
+    <div class="px-4 py-2.5">
+      <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Firma</p>
+      <img src="{{ firma_data.FirmaImagen }}" alt="Firma" class="max-h-20 border border-gray-100 rounded-lg">
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
 {% endblock %}
