@@ -88,7 +88,6 @@ async def guardar(
                 KmSalida=?, NaftaSalida=?,
                 Auxilio=?, SillaBebe=?,
                 Cadenas=?, GPS=?, Barras=?, PermisoChile=?, KitSeg=?,
-                Video=?,
                 FotoFrenteIzq=?, FotoFrenteDer=?, FotoTraseraIzq=?,
                 FotoTraseraDer=?, FotoAuxilio=?, Observaciones=?, IdOperario=?
             WHERE IdReserva=?
@@ -97,7 +96,6 @@ async def guardar(
             boo("auxilio"), num("silla_bebe"),
             boo("cadenas"), boo("gps"), boo("barras"),
             boo("permiso_chile"), boo("kit_seg"),
-            boo("video"),
             foto_paths.get("FotoFrenteIzq"), foto_paths.get("FotoFrenteDer"),
             foto_paths.get("FotoTraseraIzq"), foto_paths.get("FotoTraseraDer"),
             foto_paths.get("FotoAuxilio"),
@@ -107,17 +105,16 @@ async def guardar(
         execute("""
             INSERT INTO entregas
                 (IdReserva, IdOperario, KmSalida, NaftaSalida,
-                 Auxilio, SillaBebe, Cadenas, GPS, Barras, PermisoChile, KitSeg, Video,
+                 Auxilio, SillaBebe, Cadenas, GPS, Barras, PermisoChile, KitSeg,
                  FotoFrenteIzq, FotoFrenteDer, FotoTraseraIzq,
                  FotoTraseraDer, FotoAuxilio, Observaciones)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """, [
             id_reserva, id_op,
             num("km_salida"), num("nafta_salida"),
             boo("auxilio"), num("silla_bebe"),
             boo("cadenas"), boo("gps"), boo("barras"),
             boo("permiso_chile"), boo("kit_seg"),
-            boo("video"),
             foto_paths.get("FotoFrenteIzq"), foto_paths.get("FotoFrenteDer"),
             foto_paths.get("FotoTraseraIzq"), foto_paths.get("FotoTraseraDer"),
             foto_paths.get("FotoAuxilio"), val("observaciones"),
