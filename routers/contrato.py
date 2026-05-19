@@ -250,7 +250,7 @@ def _build_context(id_reserva: int) -> dict:
         ctx.update({
             "Km salida":     km,
             "Km  salida":    km,   # alias con doble espacio (typo en el template DOCX)
-            "Nafta salida":  str(e.get("NaftaSalida") or ""),
+            "Nafta salida":  f"{e.get('NaftaSalida') or 0}%",
             "AUXILIO":       _yn(e.get("Auxilio")),
             "Silla Bebe":    str(e.get("SillaBebe") or 0),
             "Cadenas":       _yn(e.get("Cadenas")),
