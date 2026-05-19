@@ -1,0 +1,22 @@
+{
+  "name": "CarCloud OPR",
+  "short_name": "OPR",
+  "description": "Operaciones de campo - ABA Rent a Car",
+  "start_url": "/hojas-ruta",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#16a34a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/static/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}{{ fecha.strftime('%d/%m/%Y') }}{% endblock %}
+
+{% block header_left %}
+  <a href="/hojas-ruta" class="p-2 -ml-1 text-gray-600">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+    </svg>
+  </a>
+{% endblock %}
+{% block header_title %}HOJAS DE RUTA{% endblock %}
+
+{% block content %}
+
+{% set dias_es = {'Monday':'LUNES','Tuesday':'MARTES','Wednesday':'MIÉRCOLES','Thursday':'JUEVES','Friday':'VIERNES','Saturday':'SÁBADO','Sunday':'DOMINGO'} %}
+<div class="px-4 py-3 text-sm font-semibold text-gray-700 bg-gray-50 border-b border-gray-100 uppercase tracking-wide">
+  {{ fecha.strftime('%d/%m/%Y') }} — {{ dias_es.get(fecha.strftime('%A'), fecha.strftime('%A').upper()) }}
+</div>
+
+{% if not grupos %}
+<div class="flex flex-col items-center justify-center py-20 text-gray-400">
+  <p class="text-sm">Sin movimientos para este día</p>
+</div>
+{% endif %}
+
+{% for sucursal, movimientos in grupos.items() %}
+<div class="mt-2">
+  <!-- Encabezado sucursal -->
+  <div class="flex items-center px-4 py-2">
+    <span class="font-semibold text-gray-900 text-base">{{ sucursal }}</span>
+    <span class="ml-2 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full px-2 py-0.5">{{ movimientos|length }}</span>
+  </div>
+
+  <div class="divide-y divide-gray-100 bg-white border-y border-gray-100">
+    {% for m in movimientos %}
+    <a href="/planilla/{{ m.IdReserva }}?tipo={{ m.TipoMovimiento }}"
+       class="flex items-start px-4 py-3 gap-3 active:bg-gray-50 transition-colors">
+
+      <!-- Indicador estado + dirección -->
+      <div class="flex-shrink-0 mt-0.5">
+        {% if m.Procesado %}
+          <!-- Completado -->
+          <div class="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center">
+            <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>
+          </div>
+        {% else %}
+          <!-- Pendiente -->
+          <div class="w-7 h-7 rounded-full flex items-center justify-center
+            {% if m.TipoMovimiento == 'OUT' %}bg-red-50{% else %}bg-green-50{% endif %}">
+            {% if m.TipoMovimiento == 'IN' %}
+              <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+              </svg>
+            {% else %}
+              <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+              </svg>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Datos -->
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-gray-900 text-sm truncate">
+          {{ [m.Matricula, m.Lugar, m.NombreCliente, m.IdReserva] | select | join(' - ') }}
+        </p>
+        {% if m.Adicionales %}
+        <p class="text-xs text-gray-500 truncate mt-0.5">{{ m.Adicionales }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Hora -->
+      <div class="flex-shrink-0 text-right">
+        <span class="text-xs text-gray-500">{{ m.HoraMovimiento or '' }}</span>
+        <svg class="w-4 h-4 text-gray-300 ml-auto mt-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+      </div>
+
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endfor %}
+
+{% endblock %}

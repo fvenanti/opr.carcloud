@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Pagos — Reserva {{ id_reserva }}{% endblock %}
+{% block main_class %}pb-6{% endblock %}
+{% block bottom_nav %}{% endblock %}
+
+{% block header_left %}
+  <a href="/planilla/{{ id_reserva }}" class="p-2 -ml-1 text-gray-600">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+    </svg>
+  </a>
+{% endblock %}
+{% block header_title %}AGREGAR PAGOS{% endblock %}
+
+{% block content %}
+
+<!-- Listado de pagos existentes -->
+{% if pagos %}
+<div class="mx-4 mt-4 bg-white rounded-2xl border border-gray-100 shadow-sm divide-y divide-gray-50 mb-4">
+  {% for p in pagos %}
+  <div class="px-4 py-3 flex items-start justify-between gap-2">
+    <div class="flex-1 min-w-0">
+      <p class="text-sm font-semibold text-gray-900">
+        $ {{ "%.0f"|format(p.Importe) }} {{ p.Moneda }}
+      </p>
+      <p class="text-xs text-gray-500">{{ p.Concepto }} · {{ p.TipoPago }} · {{ p.FechaPago }}</p>
+      {% if p.Observaciones %}<p class="text-xs text-gray-400 truncate">{{ p.Observaciones }}</p>{% endif %}
+    </div>
+    <form method="post" action="/planilla/{{ id_reserva }}/pagos/{{ p.Id }}/eliminar"
+          onsubmit="return confirm('¿Eliminar este pago?')">
+      <button class="text-red-400 p-1 active:text-red-600">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+        </svg>
+      </button>
+    </form>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Formulario nuevo pago -->
+<div class="px-4 pb-4">
+  <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Nuevo pago</h2>
+  <form method="post" action="/planilla/{{ id_reserva }}/pagos"
+        x-data="{ moneda: 'PESO', tipo: 'Efectivo', concepto: 'Alquiler' }"
+        class="space-y-4 bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+
+    <div>
+      <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">Fecha de Pago</label>
+      <input type="date" name="fecha_pago" value="{{ hoy }}"
+             class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-green-500">
+    </div>
+
+    {% if total_pendiente is not none %}
+    <div>
+      <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">Total Pendiente</label>
+      <div class="w-full border border-gray-100 rounded-xl px-4 py-3 text-gray-500 bg-gray-50 text-sm">
+        $ {{ "%.0f"|format(total_pendiente) }}
+      </div>
+    </div>
+    {% endif %}
+
+    <div>
+      <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">Importe <span class="text-red-500">*</span></label>
+      <input type="number" name="importe" step="0.01" min="0" value="0" required
+             class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-green-500">
+    </div>
+
+    <div>
+      <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">Moneda</label>
+      <div class="grid grid-cols-2 gap-2">
+        <button type="button" @click="moneda='PESO'"
+                :class="moneda==='PESO' ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-700 border-gray-200'"
+                class="border rounded-xl py-3 font-semibold text-sm transition-colors">PESO</button>
+        <button type="button" @click="moneda='DOLAR'"
+                :class="moneda==='DOLAR' ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-700 border-gray-200'"
+                class="border rounded-xl py-3 font-semibold text-sm transition-colors">DÓLAR</button>
+        <input type="hidden" name="moneda" :value="moneda">
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">Tipo de Pago</label>
+      <select name="tipo_pago" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 bg-white focus:outline-none focus:border-green-500">
+        {% for opt in ['Efectivo','Tarjeta Débito','Tarjeta Crédito','Transferencia','Otro'] %}
+        <option>{{ opt }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">Tipo de Cambio</label>
+      <input type="number" name="tipo_cambio" step="0.01" min="1" value="1"
+             class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-green-500">
+    </div>
+
+    <div>
+      <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">Concepto</label>
+      <select name="concepto" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 bg-white focus:outline-none focus:border-green-500">
+        {% for opt in ['Alquiler','Adicional','Tasa Aeropuerto','Seguro','Depósito','Otro'] %}
+        <option>{{ opt }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">Observaciones</label>
+      <textarea name="observaciones" rows="2"
+                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-green-500 resize-none"></textarea>
+    </div>
+
+    <button type="submit"
+            class="w-full bg-green-600 text-white font-semibold rounded-2xl py-4 text-base active:bg-green-700 transition-colors">
+      Agregar Pago
+    </button>
+  </form>
+</div>
+
+{% endblock %}

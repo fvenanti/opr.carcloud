@@ -1,0 +1,10 @@
+services:
+  opr:
+    build: .
+    container_name: carcloud-opr
+    restart: always
+    network_mode: host          # accede a localhost:1433 directamente
+    env_file:
+      - .env
+    volumes:
+      - ./uploads:/app/uploads

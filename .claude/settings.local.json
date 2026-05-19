@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:docs.google.com)",
+      "Bash(python -c ' *)",
+      "Bash(pip install *)",
+      "Bash(python *)",
+      "Bash(rsync -avz --exclude __pycache__ --exclude *.pyc -e 'ssh -i '\\\\''/c/Users/fvena/Desktop/Carcloud-ec2/ClaveCarCloudABACAR.pem'\\\\'' -o StrictHostKeyChecking=no' /c/Users/fvena/Desktop/CarcloudOp/ ubuntu@98.88.118.221:/home/ubuntu/CarcloudOp/)",
+      "Bash(scp -i C:/Users/fvena/Desktop/Carcloud-ec2/ClaveCarCloudABACAR.pem -o StrictHostKeyChecking=no C:/Users/fvena/Desktop/CarcloudOp/Dockerfile C:/Users/fvena/Desktop/CarcloudOp/requirements.txt C:/Users/fvena/Desktop/CarcloudOp/main.py C:/Users/fvena/Desktop/CarcloudOp/.env ubuntu@98.88.118.221:/home/ubuntu/CarcloudOp/)",
+      "Bash(scp -i C:/Users/fvena/Desktop/Carcloud-ec2/ClaveCarCloudABACAR.pem -o StrictHostKeyChecking=no C:/Users/fvena/Desktop/CarcloudOp/routers/planilla.py C:/Users/fvena/Desktop/CarcloudOp/routers/contrato.py ubuntu@98.88.118.221:/home/ubuntu/CarcloudOp/routers/)",
+      "Bash(scp -i C:/Users/fvena/Desktop/Carcloud-ec2/ClaveCarCloudABACAR.pem -o StrictHostKeyChecking=no C:/Users/fvena/Desktop/CarcloudOp/templates/planilla.html C:/Users/fvena/Desktop/CarcloudOp/templates/enviar_contrato.html ubuntu@98.88.118.221:/home/ubuntu/CarcloudOp/templates/)",
+      "Bash(git rm *)",
+      "Bash(git add *)",
+      "Bash(git commit -m 'Initial commit — CarCloud OPR app *)",
+      "Bash(git config *)"
+    ]
+  }
+}

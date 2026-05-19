@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Enviar Contrato{% endblock %}
+{% block main_class %}pb-6{% endblock %}
+{% block bottom_nav %}{% endblock %}
+
+{% block header_left %}
+  <a href="/planilla/{{ id_reserva }}" class="p-2 -ml-1 text-gray-600">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+    </svg>
+  </a>
+{% endblock %}
+{% block header_title %}ENVIAR CONTRATO{% endblock %}
+
+{% block content %}
+<div class="px-4 pt-6 space-y-4">
+
+  {% if contrato_enviado %}
+  <div class="bg-green-50 border border-green-200 rounded-xl px-4 py-3 flex items-start gap-3">
+    <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    <p class="text-green-800 text-sm font-medium">El contrato ya fue enviado y guardado.</p>
+  </div>
+  {% endif %}
+
+  {% if ok %}
+  <div class="bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-green-800 text-sm font-medium">
+    Contrato enviado exitosamente a {{ client_email }}.
+  </div>
+  {% endif %}
+
+  {% if error %}
+  <div class="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-red-800 text-sm">
+    {% if error == 'email_vacio' %}Ingresá el email del destinatario.
+    {% elif error == 'ya_enviado' %}El contrato ya fue enviado anteriormente.
+    {% else %}Error al generar o enviar el contrato. Revisá los logs del servidor.
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if not contrato_enviado %}
+  <div class="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-sm text-blue-800">
+    Se generará el PDF del contrato y se enviará desde
+    <strong>info@abarentacar.com.ar</strong>.
+  </div>
+  {% endif %}
+
+  <form method="post" action="/planilla/{{ id_reserva }}/enviar-contrato" class="space-y-4">
+
+    <div>
+      <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">
+        Email destinatario {% if not contrato_enviado %}<span class="text-red-500">*</span>{% endif %}
+      </label>
+      <input type="email" name="email" value="{{ client_email }}"
+             {% if not contrato_enviado %}required{% endif %}
+             {% if contrato_enviado %}disabled{% endif %}
+             class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 bg-white
+                    focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500
+                    {% if contrato_enviado %}opacity-50 cursor-not-allowed{% endif %}">
+      {% if client_name %}
+      <p class="text-xs text-gray-400 mt-1">{{ client_name }}</p>
+      {% endif %}
+    </div>
+
+    {% if contrato_enviado %}
+    <button type="button" disabled
+            class="w-full bg-gray-300 text-gray-500 font-semibold rounded-2xl py-4 text-base
+                   cursor-not-allowed flex items-center justify-center gap-2">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      Contrato ya enviado
+    </button>
+    {% else %}
+    <button type="submit"
+            class="w-full bg-blue-600 text-white font-semibold rounded-2xl py-4 text-base
+                   active:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+      </svg>
+      Generar PDF y Enviar
+    </button>
+    {% endif %}
+
+  </form>
+</div>
+{% endblock %}

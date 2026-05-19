@@ -1,0 +1,28 @@
+name: Deploy a EC2
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-opr
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH a EC2 y deploy
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host:     ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key:      ${{ secrets.SSH_PRIVATE_KEY }}
+          port:     22
+          script_stop: true
+          script: |
+            cd /home/ubuntu/opr || exit 1
+            git pull --ff-only origin dev || exit 1
+            docker compose up -d --build 2>&1 | tail -5
+            docker ps --filter name=carcloud-opr --format 'table {{.Names}}\t{{.Status}}'

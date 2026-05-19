@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Datos de la Reserva{% endblock %}
+{% block main_class %}pb-6{% endblock %}
+{% block bottom_nav %}{% endblock %}
+
+{% block header_left %}
+  <a href="/planilla/{{ id_reserva }}" class="p-2 -ml-1 text-gray-600">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+    </svg>
+  </a>
+{% endblock %}
+{% block header_title %}DATOS DE LA RESERVA{% endblock %}
+
+{% block content %}
+{% macro field(label, name, type, val, req=false) %}
+<div>
+  <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">
+    {{ label }}{% if req %} <span class="text-red-500">*</span>{% endif %}
+  </label>
+  <input type="{{ type }}" name="{{ name }}" value="{{ val or '' }}"
+         {% if req %}required{% endif %}
+         class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 bg-white focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
+</div>
+{% endmacro %}
+
+{% macro section(title) %}
+<div class="text-xs font-bold text-gray-400 uppercase tracking-widest pt-4 pb-1 border-b border-gray-100 mb-2">
+  {{ title }}
+</div>
+{% endmacro %}
+
+<form method="post" action="/planilla/{{ id_reserva }}/adicionales" class="px-4 pt-4 space-y-4">
+
+  {% set v = adicional if adicional else prefill %}
+  {{ section('Devolución') }}
+  {{ field('Fecha Devolución', 'fecha_devolucion', 'date', adicional.FechaDevolucion or prefill.FechaDevolucion, req=true) }}
+  {{ field('Hora Devolución', 'hora_devolucion', 'time', adicional.HoraDevolucion or prefill.HoraDevolucion, req=true) }}
+  {{ field('Lugar Devolución', 'lugar_devolucion', 'text', adicional.LugarDevolucion or prefill.LugarDevolucion, req=true) }}
+  {{ field('Domicilio Provisorio', 'domicilio_provisorio', 'text', adicional.DomicilioProvisorio) }}
+
+  {{ section('Conductor Adicional 1') }}
+  {{ field('Nombre completo', 'conductor1', 'text', adicional.Conductor1) }}
+  {{ field('Número de Licencia', 'licencia1', 'text', adicional.Licencia1) }}
+  {{ field('Vencimiento', 'vencimiento1', 'date', adicional.Vencimiento1) }}
+  {{ field('Emitida por', 'emitida_por1', 'text', adicional.EmitidaPor1) }}
+  {{ field('Categoría', 'categoria1', 'text', adicional.Categoria1) }}
+
+  {{ section('Conductor Adicional 2') }}
+  {{ field('Nombre completo', 'conductor2', 'text', adicional.Conductor2) }}
+  {{ field('Número de Licencia', 'licencia2', 'text', adicional.Licencia2) }}
+  {{ field('Vencimiento', 'vencimiento2', 'date', adicional.Vencimiento2) }}
+  {{ field('Emitida por', 'emitida_por2', 'text', adicional.EmitidaPor2) }}
+  {{ field('Categoría', 'categoria2', 'text', adicional.Categoria2) }}
+
+  {{ section('Garantía') }}
+  {{ field('N° Tarjeta de Crédito', 'num_tarjeta', 'text', adicional.NumTarjetaGarantia) }}
+  {{ field('Vencimiento Tarjeta', 'vencimiento_tarjeta', 'date', adicional.VencimientoTarjeta) }}
+  {{ field('Código de Seguridad', 'cod_seguridad', 'text', adicional.CodSeguridad) }}
+  {{ field('Garantía en Efectivo', 'garantia_efectivo', 'number', adicional.GarantiaEfectivo) }}
+
+  <div>
+    <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">Moneda Garantía</label>
+    <div class="grid grid-cols-2 gap-2" x-data="{ moneda: '{{ adicional.GarantiaMoneda or 'PESO' }}' }">
+      <button type="button" @click="moneda='PESO'"
+              :class="moneda==='PESO' ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-700 border-gray-200'"
+              class="border rounded-xl py-3 font-semibold transition-colors text-sm">PESO</button>
+      <button type="button" @click="moneda='DOLAR'"
+              :class="moneda==='DOLAR' ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-700 border-gray-200'"
+              class="border rounded-xl py-3 font-semibold transition-colors text-sm">DÓLAR</button>
+      <input type="hidden" name="garantia_moneda" :value="moneda">
+    </div>
+  </div>
+
+  <button type="submit"
+          class="w-full bg-green-600 text-white font-semibold rounded-2xl py-4 text-base active:bg-green-700 transition-colors mt-4">
+    Guardar
+  </button>
+</form>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Hojas de Ruta{% endblock %}
+{% block header_title %}HOJAS DE RUTA{% endblock %}
+{% block header_right %}
+  <a href="/hojas-ruta" class="text-gray-400 p-2">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+    </svg>
+  </a>
+{% endblock %}
+
+{% block content %}
+<div class="divide-y divide-gray-100">
+
+  {% if not fechas %}
+  <div class="flex flex-col items-center justify-center py-20 text-gray-400">
+    <svg class="w-12 h-12 mb-3" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+    </svg>
+    <p class="text-sm">Sin movimientos próximos</p>
+  </div>
+  {% endif %}
+
+  {% for fila in fechas %}
+  {% set d = fila.fecha %}
+  {% set dias_es = ['LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES','SÁBADO','DOMINGO'] %}
+  <a href="/hojas-ruta/{{ d }}"
+     class="flex items-center px-4 py-4 bg-white active:bg-gray-50 transition-colors">
+    <div class="flex-1">
+      <span class="text-sm font-medium text-gray-900">
+        {{ d.strftime('%d/%m/%Y') }} — {{ d.strftime('%A').upper() }}
+      </span>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="bg-gray-100 text-gray-700 text-sm font-semibold rounded-full px-2.5 py-0.5 min-w-[2rem] text-center">
+        {{ fila.cantidad }}
+      </span>
+      <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+      </svg>
+    </div>
+  </a>
+  {% endfor %}
+
+</div>
+{% endblock %}

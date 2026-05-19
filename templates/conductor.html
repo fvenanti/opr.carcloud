@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Conductor Principal{% endblock %}
+{% block main_class %}pb-6{% endblock %}
+{% block bottom_nav %}{% endblock %}
+
+{% block header_left %}
+  <a href="/planilla/{{ id_reserva }}" class="p-2 -ml-1 text-gray-600">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+    </svg>
+  </a>
+{% endblock %}
+{% block header_title %}CONDUCTOR PRINCIPAL{% endblock %}
+
+{% block content %}
+{% macro field(label, name, type, val, required=false) %}
+<div>
+  <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">
+    {{ label }}{% if required %} <span class="text-red-500">*</span>{% endif %}
+  </label>
+  <input type="{{ type }}" name="{{ name }}" value="{{ val or '' }}"
+         {% if required %}required{% endif %}
+         class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 bg-white focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500">
+</div>
+{% endmacro %}
+
+<form method="post" action="/planilla/{{ id_reserva }}/conductor" class="px-4 pt-4 space-y-4">
+
+  {% set v = conductor if conductor else prefill %}
+  {{ field('Nombre', 'nombre', 'text', v.Nombre) }}
+  {{ field('Apellido', 'apellido', 'text', v.Apellido) }}
+  {{ field('Fecha de Nacimiento', 'fecha_nacimiento', 'date', v.FechaNacimiento) }}
+
+  <div>
+    <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">DNI Tipo</label>
+    <select name="dni_tipo" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 bg-white focus:outline-none focus:border-green-500">
+      {% for opt in ['DNI','Pasaporte','CE','LC','LE'] %}
+      <option {% if (v.DniTipo or 'DNI') == opt %}selected{% endif %}>{{ opt }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  {{ field('DNI Número', 'dni_numero', 'text', v.DniNumero) }}
+  {{ field('Teléfono', 'telefono', 'tel', v.Telefono) }}
+  {{ field('Domicilio Particular', 'domicilio', 'text', v.Domicilio) }}
+  {{ field('Mail', 'mail', 'email', v.Mail) }}
+  {{ field('Número de Licencia', 'numero_licencia', 'text', v.NumeroLicencia) }}
+  {{ field('Vencimiento Licencia', 'vencimiento_licencia', 'date', v.VencimientoLicencia) }}
+  {{ field('Emitida por', 'emitida_por', 'text', v.EmitidaPor) }}
+  {{ field('Categoría', 'categoria', 'text', v.Categoria) }}
+
+  <button type="submit"
+          class="w-full bg-green-600 text-white font-semibold rounded-2xl py-4 text-base active:bg-green-700 transition-colors mt-6">
+    Guardar
+  </button>
+</form>
+{% endblock %}
