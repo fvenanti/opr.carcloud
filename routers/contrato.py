@@ -83,6 +83,26 @@ def _yn(val) -> str:
     return "SI" if val in (1, True, "1", "Y", "y") else "NO"
 
 
+def _currency_symbol(moneda: str) -> str:
+    m = (moneda or "").strip().lower()
+    if "dolar" in m or "usd" in m or "dollar" in m:
+        return "US$"
+    return "$"
+
+
+def _fmt_importe(val, moneda: str = "Pesos") -> str:
+    """Formatea un importe sin decimales con símbolo de moneda. Ej: $ 483.360"""
+    if val is None or val == "":
+        return ""
+    try:
+        amount = int(round(float(val)))
+        symbol = _currency_symbol(moneda)
+        formatted = f"{amount:,}".replace(",", ".")   # formato argentino
+        return f"{symbol} {formatted}"
+    except (ValueError, TypeError):
+        return str(val)
+
+
 def _disk_path(url_path: str) -> str:
     if not url_path:
         return ""
@@ -118,20 +138,20 @@ def _build_context(id_reserva: int) -> dict:
     """, [id_reserva])
     if res:
         r = res[0]
-        # abonada es boolean en la DB; el template usa "Y"/"N"
+        moneda = r.get("MonedaDesc") or "Pesos"
         ctx["abonada"] = "Y" if r.get("abonada") else "N"
         ctx.update({
             "MATRICULA":           r.get("MATRICULA") or "",
             "Horario Salida":      _fmt_time(r.get("HorarioSalida")),
             "Fecha Salida":        _fmt_date(r.get("FechaSalida")),
             "Lugar Salida":        r.get("LugarSalida") or "",
-            "Tarifa":              str(r.get("Tarifa") or ""),
-            "Monedas.Descripcion": r.get("MonedaDesc") or "",
+            "Monedas.Descripcion": moneda,
             "Días":                str(r.get("Dias") or ""),
             "Km":                  str(r.get("Km") or ""),
-            "Km adicional":        str(r.get("KmAdicional") or ""),
-            "FranquiciaChoque":    str(r.get("FranquiciaChoque") or ""),
-            "FranquiciaVuelco":    str(r.get("FranquiciaVuelco") or ""),
+            "Tarifa":              _fmt_importe(r.get("Tarifa"), moneda),
+            "Km adicional":        _fmt_importe(r.get("KmAdicional"), moneda),
+            "FranquiciaChoque":    _fmt_importe(r.get("FranquiciaChoque"), moneda),
+            "FranquiciaVuelco":    _fmt_importe(r.get("FranquiciaVuelco"), moneda),
         })
 
     # Totales y extras desde movimientos
@@ -145,10 +165,11 @@ def _build_context(id_reserva: int) -> dict:
     """, [id_reserva])
     if mov:
         m = mov[0]
-        ctx["Total Alquiler"]  = str(m.get("TotalAlquiler") or "")
-        ctx["Total Abonado"]   = str(m.get("TotalAbonado") or "")
-        ctx["Total Pendiente"] = str(m.get("TotalPendiente") or "")
-        ctx["Extras"]          = str(m.get("Extras") or "")
+        moneda = ctx.get("Monedas.Descripcion", "Pesos")
+        ctx["Total Alquiler"]  = _fmt_importe(m.get("TotalAlquiler"), moneda)
+        ctx["Total Abonado"]   = _fmt_importe(m.get("TotalAbonado"), moneda)
+        ctx["Total Pendiente"] = _fmt_importe(m.get("TotalPendiente"), moneda)
+        ctx["Extras"]          = _fmt_importe(m.get("Extras"), moneda)
 
     # Vehículo
     if ctx.get("MATRICULA"):
@@ -158,12 +179,13 @@ def _build_context(id_reserva: int) -> dict:
         """, [ctx["MATRICULA"]])
         if veh:
             v = veh[0]
+            moneda = ctx.get("Monedas.Descripcion", "Pesos")
             ctx.update({
                 "MARCA":          v.get("Marca") or "",
                 "MODELO":         v.get("Modelo") or "",
                 "COMBUSTIBLE":    v.get("COMBUSTIBLE") or "",
-                "CUARTODETANQUE": str(v.get("CuartoTanque") or ""),
-                "Espera":         str(v.get("Espera") or ""),
+                "CUARTODETANQUE": _fmt_importe(v.get("CuartoTanque"), moneda),
+                "Espera":         _fmt_importe(v.get("Espera"), moneda),
             })
 
     # Conductor principal
@@ -215,7 +237,7 @@ def _build_context(id_reserva: int) -> dict:
             "Categoria 2":               a.get("Categoria2") or "",
             "Numero Tarjeta de Credito": a.get("NumTarjetaGarantia") or "",
             "Vencimiento Tarjeta":       _fmt_date(a.get("VencimientoTarjeta")),
-            "Importe Efectivo":          str(a.get("GarantiaEfectivo") or ""),
+            "Importe Efectivo":          _fmt_importe(a.get("GarantiaEfectivo"), a.get("GarantiaMoneda") or "Pesos"),
             "Moneda":                    a.get("GarantiaMoneda") or "",
             "Domicilio Provisorio":      a.get("DomicilioProvisorio") or "",
         })
@@ -411,7 +433,7 @@ def _expand_pagos_loop(doc, pagos_list: list):
     pago_fields = {
         "Fecha de pago":  lambda p: _fmt_date(p.get("FechaPago")),
         "Fe cha de pago": lambda p: _fmt_date(p.get("FechaPago")),  # artifact de split en DOCX
-        "Importe":        lambda p: str(p.get("Importe") or ""),
+        "Importe":        lambda p: _fmt_importe(p.get("Importe"), p.get("Moneda") or "Pesos"),
         "Moneda":         lambda p: p.get("Moneda") or "",
         "Tipo de pago":   lambda p: p.get("TipoPago") or "",
         "Tipo de Cambio": lambda p: str(p.get("TipoCambio") or ""),
