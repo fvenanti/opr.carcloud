@@ -83,10 +83,11 @@ async def ver(request: Request, id_reserva: int):
         and tiene_entrega
         and tiene_firma
     )
-    envios_count = query(
-        "SELECT COUNT(*) AS n FROM contratos_enviados WHERE IdReserva = ?", [id_reserva]
-    )
-    envios_count = envios_count[0]["n"] if envios_count else 0
+    try:
+        _ec = query("SELECT COUNT(*) AS n FROM contratos_enviados WHERE IdReserva = ?", [id_reserva])
+        envios_count = _ec[0]["n"] if _ec else 0
+    except Exception:
+        envios_count = 0
 
     return templates.TemplateResponse("planilla.html", {
         "request":           request,

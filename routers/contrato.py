@@ -31,20 +31,23 @@ def contrato_pdf_path(id_reserva: int) -> str:
 
 
 def contrato_enviado(id_reserva: int) -> bool:
-    """Devuelve True si hubo al menos un envío (para planilla.py)."""
-    rows = query(
-        "SELECT TOP 1 Id FROM contratos_enviados WHERE IdReserva = ?", [id_reserva]
-    )
-    return bool(rows)
+    try:
+        rows = query("SELECT TOP 1 Id FROM contratos_enviados WHERE IdReserva = ?", [id_reserva])
+        return bool(rows)
+    except Exception:
+        return False
 
 
 def _historial_envios(id_reserva: int) -> list:
-    return query("""
-        SELECT EmailDestino, FechaEnvio
-        FROM contratos_enviados
-        WHERE IdReserva = ?
-        ORDER BY FechaEnvio DESC
-    """, [id_reserva])
+    try:
+        return query("""
+            SELECT EmailDestino, FechaEnvio
+            FROM contratos_enviados
+            WHERE IdReserva = ?
+            ORDER BY FechaEnvio DESC
+        """, [id_reserva])
+    except Exception:
+        return []
 
 
 SMTP_HOST = "smtp.gmail.com"
