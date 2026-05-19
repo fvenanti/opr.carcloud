@@ -113,11 +113,13 @@ def _build_context(id_reserva: int) -> dict:
             [Km adicional]        AS KmAdicional,
             FranquiciaChoque,
             FranquiciaVuelco,
-            abonada               AS TotalAbonado
+            abonada
         FROM dbo.vw_AppSheet_Reservas WHERE IdReserva = ?
     """, [id_reserva])
     if res:
         r = res[0]
+        # abonada es boolean en la DB; el template usa "Y"/"N"
+        ctx["abonada"] = "Y" if r.get("abonada") else "N"
         ctx.update({
             "MATRICULA":           r.get("MATRICULA") or "",
             "Horario Salida":      _fmt_time(r.get("HorarioSalida")),
@@ -130,17 +132,23 @@ def _build_context(id_reserva: int) -> dict:
             "Km adicional":        str(r.get("KmAdicional") or ""),
             "FranquiciaChoque":    str(r.get("FranquiciaChoque") or ""),
             "FranquiciaVuelco":    str(r.get("FranquiciaVuelco") or ""),
-            "Total Abonado":       str(r.get("TotalAbonado") or ""),
         })
 
-    # Totales
+    # Totales y extras desde movimientos
     mov = query("""
-        SELECT TOP 1 [Total Alquiler] AS TotalAlquiler, [Total Pendiente] AS TotalPendiente
+        SELECT TOP 1
+            [Total Alquiler]  AS TotalAlquiler,
+            [Total Abonado]   AS TotalAbonado,
+            [Total Pendiente] AS TotalPendiente,
+            Extras
         FROM dbo.vw_AppSheet_Movimientos WHERE IdReserva = ?
     """, [id_reserva])
     if mov:
-        ctx["Total Alquiler"]  = str(mov[0].get("TotalAlquiler") or "")
-        ctx["Total Pendiente"] = str(mov[0].get("TotalPendiente") or "")
+        m = mov[0]
+        ctx["Total Alquiler"]  = str(m.get("TotalAlquiler") or "")
+        ctx["Total Abonado"]   = str(m.get("TotalAbonado") or "")
+        ctx["Total Pendiente"] = str(m.get("TotalPendiente") or "")
+        ctx["Extras"]          = str(m.get("Extras") or "")
 
     # Vehículo
     if ctx.get("MATRICULA"):
@@ -209,7 +217,7 @@ def _build_context(id_reserva: int) -> dict:
             "Vencimiento Tarjeta":       _fmt_date(a.get("VencimientoTarjeta")),
             "Importe Efectivo":          str(a.get("GarantiaEfectivo") or ""),
             "Moneda":                    a.get("GarantiaMoneda") or "",
-            "Domicilio Provisorio":      a.get("DomicilioProvisorio") or "" if hasattr(a, "get") else "",
+            "Domicilio Provisorio":      a.get("DomicilioProvisorio") or "",
         })
 
     # Entrega
