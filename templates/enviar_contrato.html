@@ -38,7 +38,8 @@
     {% if historial %}Si editaste datos, este nuevo envío reemplazará el PDF guardado.{% endif %}
   </div>
 
-  <form method="post" action="/planilla/{{ id_reserva }}/enviar-contrato" class="space-y-4">
+  <form method="post" action="/planilla/{{ id_reserva }}/enviar-contrato" class="space-y-4"
+        x-data="{ enviando: false }" @submit="enviando = true">
     <div>
       <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">
         Email destinatario <span class="text-red-500">*</span>
@@ -51,14 +52,21 @@
       {% endif %}
     </div>
 
-    <button type="submit"
-            class="w-full bg-blue-600 text-white font-semibold rounded-2xl py-4 text-base
-                   active:bg-blue-700 transition-colors flex items-center justify-center gap-2">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <button type="submit" :disabled="enviando"
+            :class="enviando ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 active:bg-blue-700'"
+            class="w-full text-white font-semibold rounded-2xl py-4 text-base
+                   transition-colors flex items-center justify-center gap-2">
+      <!-- Spinner mientras envía -->
+      <svg x-show="enviando" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+      </svg>
+      <!-- Ícono de mail cuando no envía -->
+      <svg x-show="!enviando" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round"
               d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
       </svg>
-      {% if historial %}Reenviar Contrato{% else %}Generar PDF y Enviar{% endif %}
+      <span x-text="enviando ? 'Enviando...' : '{% if historial %}Reenviar Contrato{% else %}Generar PDF y Enviar{% endif %}'"></span>
     </button>
   </form>
 
