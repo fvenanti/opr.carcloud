@@ -32,7 +32,7 @@ def contrato_pdf_path(id_reserva: int) -> str:
 
 def contrato_enviado(id_reserva: int) -> bool:
     try:
-        rows = query("SELECT TOP 1 Id FROM contratos_enviados WHERE IdReserva = ?", [id_reserva])
+        rows = query("SELECT TOP 1 Id FROM opr.mails_enviados WHERE IdReserva = ?", [id_reserva])
         return bool(rows)
     except Exception:
         return False
@@ -41,10 +41,10 @@ def contrato_enviado(id_reserva: int) -> bool:
 def _historial_envios(id_reserva: int) -> list:
     try:
         return query("""
-            SELECT EmailDestino, FechaEnvio
-            FROM contratos_enviados
+            SELECT Recipient, Nombre, FechaCreacion
+            FROM opr.mails_enviados
             WHERE IdReserva = ?
-            ORDER BY FechaEnvio DESC
+            ORDER BY FechaCreacion DESC
         """, [id_reserva])
     except Exception:
         return []
@@ -552,9 +552,10 @@ async def enviar(request: Request, id_reserva: int):
             os.makedirs(os.path.dirname(dest), exist_ok=True)
             shutil.copy2(pdf_path, dest)
         # Registrar envío en historial
+        nombre = ctx.get("_client_name", "")
         execute(
-            "INSERT INTO contratos_enviados (IdReserva, EmailDestino, NombreArchivo) VALUES (?,?,?)",
-            [id_reserva, to_email, os.path.basename(contrato_pdf_path(id_reserva))]
+            "INSERT INTO opr.mails_enviados (IdReserva, Recipient, Nombre, FechaEnvio) VALUES (?,?,?,CAST(GETDATE() AS DATE))",
+            [id_reserva, to_email, nombre]
         )
         return RedirectResponse(
             f"/planilla/{id_reserva}/enviar-contrato?ok=1", status_code=303

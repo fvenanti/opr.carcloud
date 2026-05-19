@@ -8,16 +8,9 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from routers import auth, hojas_ruta, planilla, conductor, adicionales, pagos, entregas, firmas, recepcion, contrato
-from database import migrate
 import uvicorn
 
 app = FastAPI(title="CarCloud OPR", version="1.0")
-
-try:
-    migrate()
-except Exception as _migrate_err:
-    import logging
-    logging.getLogger(__name__).error("migrate() falló: %s", _migrate_err)
 
 BASE = os.path.dirname(__file__)
 app.mount("/static", StaticFiles(directory=os.path.join(BASE, "static")), name="static")

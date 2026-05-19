@@ -84,7 +84,7 @@ async def ver(request: Request, id_reserva: int):
         and tiene_firma
     )
     try:
-        _ec = query("SELECT COUNT(*) AS n FROM contratos_enviados WHERE IdReserva = ?", [id_reserva])
+        _ec = query("SELECT COUNT(*) AS n FROM opr.mails_enviados WHERE IdReserva = ?", [id_reserva])
         envios_count = _ec[0]["n"] if _ec else 0
     except Exception:
         envios_count = 0
