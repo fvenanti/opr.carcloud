@@ -97,25 +97,6 @@
     {{ toggle('Kit Seg', 'kit_seg', entrega.KitSeg) }}
   </div>
 
-  <div class="pt-2">
-    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Datos de entrada (devolución)</h3>
-    <div class="space-y-4">
-      <div>
-        <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">Km Entrada</label>
-        <input type="number" name="km_entrada" value="{{ entrega.KmEntrada or '' }}" min="0"
-               class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-green-500">
-      </div>
-      <div x-data="{ nafta_e: {{ entrega.NaftaEntrada or 0 }} }">
-        <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">
-          Nafta Entrada: <span class="font-bold text-gray-900" x-text="nafta_e + '%'"></span>
-        </label>
-        <input type="range" name="nafta_entrada" min="0" max="100" step="5"
-               x-model="nafta_e"
-               class="w-full h-3 rounded-lg appearance-none cursor-pointer accent-green-600">
-      </div>
-    </div>
-  </div>
-
   {{ toggle('Video', 'video', entrega.Video) }}
 
   <div class="space-y-4 pt-2">

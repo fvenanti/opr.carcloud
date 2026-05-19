@@ -85,7 +85,7 @@ async def guardar(
     if existing:
         execute("""
             UPDATE entregas SET
-                KmSalida=?, NaftaSalida=?, KmEntrada=?, NaftaEntrada=?,
+                KmSalida=?, NaftaSalida=?,
                 Auxilio=?, SillaBebe=?,
                 Cadenas=?, GPS=?, Barras=?, PermisoChile=?, KitSeg=?,
                 Video=?,
@@ -94,7 +94,6 @@ async def guardar(
             WHERE IdReserva=?
         """, [
             num("km_salida"), num("nafta_salida"),
-            num("km_entrada") or None, num("nafta_entrada") or None,
             boo("auxilio"), num("silla_bebe"),
             boo("cadenas"), boo("gps"), boo("barras"),
             boo("permiso_chile"), boo("kit_seg"),
@@ -107,15 +106,14 @@ async def guardar(
     else:
         execute("""
             INSERT INTO entregas
-                (IdReserva, IdOperario, KmSalida, NaftaSalida, KmEntrada, NaftaEntrada,
+                (IdReserva, IdOperario, KmSalida, NaftaSalida,
                  Auxilio, SillaBebe, Cadenas, GPS, Barras, PermisoChile, KitSeg, Video,
                  FotoFrenteIzq, FotoFrenteDer, FotoTraseraIzq,
                  FotoTraseraDer, FotoAuxilio, Observaciones)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """, [
             id_reserva, id_op,
             num("km_salida"), num("nafta_salida"),
-            num("km_entrada") or None, num("nafta_entrada") or None,
             boo("auxilio"), num("silla_bebe"),
             boo("cadenas"), boo("gps"), boo("barras"),
             boo("permiso_chile"), boo("kit_seg"),
