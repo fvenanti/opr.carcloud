@@ -438,11 +438,12 @@ async def enviar(request: Request, id_reserva: int):
 
     try:
         ctx = _build_context(id_reserva)
+        dest_email = os.environ.get("DEBUG_EMAIL_OVERRIDE") or to_email
         with tempfile.TemporaryDirectory() as tmpdir:
             docx_path = os.path.join(tmpdir, f"contrato_{id_reserva}.docx")
             _fill_docx(ctx, docx_path)
             pdf_path = _to_pdf(docx_path)
-            _send_email(to_email, pdf_path, id_reserva)
+            _send_email(dest_email, pdf_path, id_reserva)
 
             # Guardar copia permanente
             dest = contrato_pdf_path(id_reserva)
