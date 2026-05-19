@@ -2,7 +2,6 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from database import query
 from shared_templates import templates
-from routers.contrato import contrato_enviado
 
 router = APIRouter()
 
@@ -84,7 +83,10 @@ async def ver(request: Request, id_reserva: int):
         and tiene_entrega
         and tiene_firma
     )
-    ya_enviado = contrato_listo and contrato_enviado(id_reserva)
+    envios_count = query(
+        "SELECT COUNT(*) AS n FROM contratos_enviados WHERE IdReserva = ?", [id_reserva]
+    )
+    envios_count = envios_count[0]["n"] if envios_count else 0
 
     return templates.TemplateResponse("planilla.html", {
         "request":           request,
@@ -97,7 +99,7 @@ async def ver(request: Request, id_reserva: int):
         "tiene_recepcion":   tiene_recepcion,
         "tiene_firma":       tiene_firma,
         "contrato_listo":    contrato_listo,
-        "ya_enviado":        ya_enviado,
+        "envios_count":      envios_count,
         "conductor_data":    _cond[0]  if _cond  else None,
         "adicional_data":    _adic[0]  if _adic  else None,
         "pagos_data":        _pagos,

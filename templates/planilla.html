@@ -72,23 +72,18 @@
 
 {% if contrato_listo %}
 <div class="px-4 pb-4">
-  {% if ya_enviado %}
   <a href="/planilla/{{ reserva.IdReserva }}/enviar-contrato"
-     class="flex items-center justify-center gap-2 w-full bg-gray-200 text-gray-500 font-semibold rounded-2xl py-4 text-base">
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-    </svg>
-    Contrato Enviado
-  </a>
-  {% else %}
-  <a href="/planilla/{{ reserva.IdReserva }}/enviar-contrato"
-     class="flex items-center justify-center gap-2 w-full bg-blue-600 text-white font-semibold rounded-2xl py-4 text-base active:bg-blue-700 transition-colors">
+     class="relative flex items-center justify-center gap-2 w-full bg-blue-600 text-white font-semibold rounded-2xl py-4 text-base active:bg-blue-700 transition-colors">
     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
     </svg>
     Enviar Contrato
+    {% if envios_count > 0 %}
+    <span class="absolute right-4 top-1/2 -translate-y-1/2 bg-white text-blue-700 text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+      {{ envios_count }}
+    </span>
+    {% endif %}
   </a>
-  {% endif %}
 </div>
 {% endif %}
 

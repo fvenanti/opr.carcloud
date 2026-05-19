@@ -45,3 +45,23 @@ def execute_scalar(sql: str, params=None):
         return row[0] if row else None
     finally:
         conn.close()
+
+
+def migrate():
+    """Crea tablas OPR si no existen. Llamar al inicio de la app."""
+    ddl = """
+    IF NOT EXISTS (
+        SELECT 1 FROM INFORMATION_SCHEMA.TABLES
+        WHERE TABLE_SCHEMA = 'opr' AND TABLE_NAME = 'contratos_enviados'
+    )
+    BEGIN
+        CREATE TABLE opr.contratos_enviados (
+            Id           INT IDENTITY(1,1) PRIMARY KEY,
+            IdReserva    INT          NOT NULL,
+            EmailDestino VARCHAR(255) NOT NULL,
+            FechaEnvio   DATETIME     NOT NULL DEFAULT GETDATE(),
+            NombreArchivo VARCHAR(500)
+        )
+    END
+    """
+    execute(ddl)
