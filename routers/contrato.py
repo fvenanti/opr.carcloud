@@ -141,7 +141,7 @@ def _build_context(id_reserva: int) -> dict:
         moneda = r.get("MonedaDesc") or "Pesos"
         ctx["abonada"] = "Y" if r.get("abonada") else "N"
         ctx.update({
-            "MATRICULA":           r.get("MATRICULA") or "",
+            "MATRICULA":           "A" + r.get("MATRICULA") if r.get("MATRICULA") else "",
             "Horario Salida":      _fmt_time(r.get("HorarioSalida")),
             "Fecha Salida":        _fmt_date(r.get("FechaSalida")),
             "Lugar Salida":        r.get("LugarSalida") or "",
