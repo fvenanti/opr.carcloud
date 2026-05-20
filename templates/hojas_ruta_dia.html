@@ -37,28 +37,20 @@
        class="flex items-start px-4 py-3 gap-3 active:bg-gray-50 transition-colors">
 
       <!-- Indicador estado + dirección -->
-      <div class="flex-shrink-0 mt-0.5">
+      <div class="flex-shrink-0 w-7 h-7 flex items-center justify-center mt-0.5">
         {% if m.Procesado %}
-          <!-- Completado -->
-          <div class="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center">
-            <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-            </svg>
-          </div>
+          <!-- Hecho: círculo sólido -->
+          <div class="w-7 h-7 rounded-full {% if m.TipoMovimiento == 'OUT' %}bg-red-500{% else %}bg-green-500{% endif %}"></div>
+        {% elif m.TipoMovimiento == 'IN' %}
+          <!-- Pendiente entrada: flecha verde -->
+          <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
         {% else %}
-          <!-- Pendiente -->
-          <div class="w-7 h-7 rounded-full flex items-center justify-center
-            {% if m.TipoMovimiento == 'OUT' %}bg-red-50{% else %}bg-green-50{% endif %}">
-            {% if m.TipoMovimiento == 'IN' %}
-              <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-              </svg>
-            {% else %}
-              <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-              </svg>
-            {% endif %}
-          </div>
+          <!-- Pendiente salida: flecha roja -->
+          <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+          </svg>
         {% endif %}
       </div>
 
