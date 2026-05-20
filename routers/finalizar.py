@@ -37,12 +37,7 @@ def _html_email(nombre: str) -> str:
 
    <!-- Logo -->
    <tr><td align="center" style="padding:30px 0 20px;">
-    <table cellpadding="0" cellspacing="0"><tr>
-     <td align="center" style="width:130px;height:130px;background:#4a7c59;border-radius:65px;text-align:center;">
-      <p style="color:white;font-size:28px;font-weight:bold;margin:0;padding-top:32px;line-height:1;">ABA</p>
-      <p style="color:white;font-size:11px;margin:4px 0 0;letter-spacing:1px;">RENT A CAR</p>
-     </td>
-    </tr></table>
+    <p style="font-size:24px;font-weight:bold;color:#4a7c59;margin:0;letter-spacing:2px;">ABA RENT A CAR</p>
    </td></tr>
 
    <!-- Subtitle -->
