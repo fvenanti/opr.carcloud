@@ -2,6 +2,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from database import query
 from shared_templates import templates
+from utils import hoy_arg
 
 router = APIRouter()
 
@@ -30,7 +31,7 @@ OUTER APPLY (
     FROM dbo.vw_AppSheet_Reservas
     WHERE MATRICULA = v.MATRICULA
       AND [Status_Reserva.Descripcion] NOT IN {_CANCELADAS}
-      AND CAST(GETDATE() AS DATE)
+      AND CAST(? AS DATE)
           BETWEEN CAST([Fecha Salida] AS DATE) AND CAST([Fecha Entrada] AS DATE)
 ) r
 ORDER BY v.Sucursal, v.MATRICULA
@@ -52,7 +53,7 @@ def _agrupar(vehiculos: list[dict]) -> tuple[list, list, list]:
 
 @router.get("/", response_class=HTMLResponse)
 async def lista(request: Request):
-    vehiculos = query(_SQL_TODOS)
+    vehiculos = query(_SQL_TODOS, [hoy_arg().isoformat()])
     alquilados, taller, disponibles = _agrupar(vehiculos)
     return templates.TemplateResponse("vehiculos_lista.html", {
         "request":     request,

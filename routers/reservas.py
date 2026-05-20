@@ -2,7 +2,8 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from database import query
 from shared_templates import templates
-from datetime import date, timedelta
+from datetime import timedelta
+from utils import hoy_arg
 
 router = APIRouter()
 
@@ -64,7 +65,7 @@ async def lista(request: Request, q: str = ""):
         patron = f"%{q.strip()}%"
         reservas = query(_SQL_BUSCAR, [q.strip(), patron, patron])
     else:
-        desde = (date.today() - timedelta(days=5)).isoformat()
+        desde = (hoy_arg() - timedelta(days=5)).isoformat()
         reservas = query(_SQL_RECIENTES, [desde])
 
     return templates.TemplateResponse("reservas_lista.html", {

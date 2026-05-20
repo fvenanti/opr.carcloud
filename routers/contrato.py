@@ -4,7 +4,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email import encoders
-from datetime import datetime
+from utils import ahora_arg
 
 from docx import Document
 from docx.shared import Inches
@@ -282,7 +282,7 @@ def _build_context(id_reserva: int) -> dict:
         ctx["_firma_path"] = _disk_path(f.get("FirmaImagen") or "")
         ctx["Aclaracion"]  = f.get("Aclaracion") or ""
         ctx["Lugar"]       = ctx.get("Lugar Salida", "")
-        ctx["Fecha"]       = datetime.now().strftime("%d/%m/%Y")
+        ctx["Fecha"]       = ahora_arg().strftime("%d/%m/%Y")
 
     # Pagos
     pagos = query("""
@@ -609,8 +609,8 @@ async def enviar(request: Request, id_reserva: int):
         # Registrar envío en historial
         nombre = ctx.get("_client_name", "")
         execute(
-            "INSERT INTO opr.mails_enviados (IdReserva, Recipient, Nombre, FechaEnvio) VALUES (?,?,?,CAST(GETDATE() AS DATE))",
-            [id_reserva, to_email, nombre]
+            "INSERT INTO opr.mails_enviados (IdReserva, Recipient, Nombre, FechaEnvio) VALUES (?,?,?,?)",
+            [id_reserva, to_email, nombre, ahora_arg().date().isoformat()]
         )
         return RedirectResponse(
             f"/planilla/{id_reserva}/enviar-contrato?ok=1", status_code=303

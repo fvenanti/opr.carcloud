@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from database import query, execute
 from shared_templates import templates
-from datetime import date
+from utils import hoy_arg
 
 router = APIRouter()
 
@@ -25,7 +25,7 @@ async def ver(request: Request, id_reserva: int):
         "id_reserva":      id_reserva,
         "pagos":           pagos,
         "total_pendiente": total_pendiente,
-        "hoy":             date.today().isoformat(),
+        "hoy":             hoy_arg().isoformat(),
         "ok":              request.query_params.get("ok"),
     })
 
@@ -48,7 +48,7 @@ async def agregar(request: Request, id_reserva: int):
         VALUES (?,?,?,?,?,?,?,?,?)
     """, [
         id_reserva,
-        val("fecha_pago") or date.today().isoformat(),
+        val("fecha_pago") or hoy_arg().isoformat(),
         dec("importe"),
         val("moneda") or "PESO",
         val("tipo_pago") or "Efectivo",

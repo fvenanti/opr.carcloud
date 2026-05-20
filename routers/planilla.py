@@ -50,8 +50,8 @@ async def ver(request: Request, id_reserva: int):
     # Tipo de movimiento: viene de la hoja de ruta o se detecta por fecha
     tipo = request.query_params.get("tipo", "").upper()
     if tipo not in ("IN", "OUT"):
-        from datetime import date
-        hoy = date.today()
+        from utils import hoy_arg
+        hoy = hoy_arg()
         fs = reserva.get("FechaSalida")
         fe = reserva.get("FechaEntrada")
         if fs and (hasattr(fs, "date") and fs.date() == hoy or fs == hoy):

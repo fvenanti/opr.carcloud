@@ -2,7 +2,8 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from database import query
 from shared_templates import templates
-from datetime import date, timedelta
+from datetime import timedelta
+from utils import hoy_arg
 
 router = APIRouter()
 
@@ -72,7 +73,7 @@ def _agrupar_por_sucursal(movimientos: list[dict]) -> dict:
 
 @router.get("/", response_class=HTMLResponse)
 async def lista(request: Request):
-    hoy = date.today()
+    hoy = hoy_arg()
     desde = hoy - timedelta(days=5)
     fechas = query(_SQL_FECHAS, [desde.isoformat(), desde.isoformat()])
     return templates.TemplateResponse("hojas_ruta_lista.html", {
