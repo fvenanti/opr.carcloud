@@ -24,17 +24,23 @@
   {% set dias_es = ['LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES','SÁBADO','DOMINGO'] %}
   {% for fila in fechas %}
   {% set d = fila.fecha %}
+  {% set es_hoy   = d == hoy %}
   {% set es_finde = d.weekday() >= 5 %}
   <a href="/hojas-ruta/{{ d }}"
      class="flex items-center px-4 py-4 transition-colors
-            {{ 'bg-amber-50 active:bg-amber-100' if es_finde else 'bg-white active:bg-gray-50' }}">
+            {% if es_hoy %}bg-primary-50 active:bg-primary-100 border-l-4 border-primary-500
+            {% elif es_finde %}bg-amber-50 active:bg-amber-100
+            {% else %}bg-white active:bg-gray-50{% endif %}">
     <div class="flex-1">
-      <span class="text-sm font-medium text-gray-900">
+      <span class="text-sm {% if es_hoy %}font-bold text-primary-700{% else %}font-medium text-gray-900{% endif %}">
         {{ d.strftime('%d/%m/%Y') }} — {{ dias_es[d.weekday()] }}
       </span>
+      {% if es_hoy %}
+      <span class="ml-2 text-xs font-semibold text-primary-600 uppercase tracking-wide">Hoy</span>
+      {% endif %}
     </div>
     <div class="flex items-center gap-3">
-      <span class="bg-gray-100 text-gray-700 text-sm font-semibold rounded-full px-2.5 py-0.5 min-w-[2rem] text-center">
+      <span class="{% if es_hoy %}bg-primary-500 text-white{% else %}bg-gray-100 text-gray-700{% endif %} text-sm font-semibold rounded-full px-2.5 py-0.5 min-w-[2rem] text-center">
         {{ fila.cantidad }}
       </span>
       <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

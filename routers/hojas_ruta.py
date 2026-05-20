@@ -76,8 +76,9 @@ async def lista(request: Request):
     desde = hoy - timedelta(days=5)
     fechas = query(_SQL_FECHAS, [desde.isoformat(), desde.isoformat()])
     return templates.TemplateResponse("hojas_ruta_lista.html", {
-        "request": request,
-        "fechas":  fechas,
+        "request":    request,
+        "fechas":     fechas,
+        "hoy":        hoy,
         "active_tab": "hojas",
     })
 
