@@ -180,10 +180,25 @@ def _build_html(tipo: str, r: dict, mov: dict, entrega: dict,
     padding: 6mm 4mm;
     box-shadow: 0 2px 8px rgba(0,0,0,.15);
   }}
-  .print-btn {{
-    display: block;
+  .toolbar {{
+    display: flex;
+    gap: 8px;
     width: 72mm;
     margin: 12px auto;
+  }}
+  .back-btn {{
+    padding: 10px 14px;
+    background: #e5e7eb;
+    color: #111;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 8px;
+    text-decoration: none;
+    white-space: nowrap;
+  }}
+  .print-btn {{
+    flex: 1;
     padding: 10px;
     background: #1d4ed8;
     color: white;
@@ -214,12 +229,15 @@ def _build_html(tipo: str, r: dict, mov: dict, entrega: dict,
     @page {{ size: 80mm auto; margin: 5mm; }}
     body {{ background: white; padding: 0; }}
     .page {{ box-shadow: none; margin: 0; padding: 0; width: auto; }}
-    .print-btn {{ display: none; }}
+    .toolbar {{ display: none; }}
   }}
 </style>
 </head>
 <body>
-<button class="print-btn" onclick="window.print()">🖨 Imprimir</button>
+<div class="toolbar">
+  <a class="back-btn" href="/planilla/{r['IdReserva']}?tipo={tipo[0]}">← Volver</a>
+  <button class="print-btn" onclick="window.print()">🖨 Imprimir</button>
+</div>
 <div class="page">
   <div class="header">
     <h1>ABA RENT A CAR</h1>
