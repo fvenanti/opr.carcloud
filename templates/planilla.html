@@ -101,13 +101,18 @@
 {% endif %}
 
 {% if mostrar_in and tiene_recepcion %}
-<div class="px-4 pb-2">
+<div class="px-4 pb-2" x-data="{ loading: false }">
   <a href="/planilla/{{ reserva.IdReserva }}/finalizar-reserva"
+     @click="loading = true"
+     :class="loading && 'pointer-events-none opacity-75'"
      class="flex items-center justify-center gap-2 w-full bg-green-600 text-white font-semibold rounded-2xl py-4 text-base active:bg-green-700 transition-colors">
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <svg x-show="!loading" class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
     </svg>
-    Finalizar Reserva
+    <svg x-show="loading" class="w-5 h-5 shrink-0 animate-spin" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+    </svg>
+    <span x-text="loading ? 'Enviando...' : 'Finalizar Reserva'"></span>
     {% if tiene_finalizacion %}<span class="ml-1 text-xs bg-white text-green-700 rounded-full px-2 py-0.5 font-bold">✓</span>{% endif %}
   </a>
 </div>
