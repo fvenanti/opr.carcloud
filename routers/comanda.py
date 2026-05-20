@@ -226,10 +226,20 @@ def _build_html(tipo: str, r: dict, mov: dict, entrega: dict,
 
   /* ── Impresión ── */
   @media print {{
-    @page {{ size: 80mm auto; margin: 5mm; }}
-    body {{ background: white; padding: 0; }}
+    @page {{ size: 80mm auto; margin: 4mm; }}
+    body {{ background: white; padding: 0; font-size: 14pt; }}
     .page {{ box-shadow: none; margin: 0; padding: 0; width: auto; }}
     .toolbar {{ display: none !important; }}
+    .header h1 {{ font-size: 18pt; }}
+    .header h2 {{ font-size: 13pt; }}
+    .header .matricula {{ font-size: 22pt; }}
+    .header div {{ font-size: 13pt; }}
+    .operador {{ font-size: 11pt; }}
+    .sec-title {{ font-size: 12pt; }}
+    .lbl {{ font-size: 13pt; padding: 1mm 0; }}
+    .val {{ font-size: 13pt; padding: 1mm 0; }}
+    .hr {{ margin: 2mm 0; }}
+    .sec {{ margin-bottom: 4mm; }}
   }}
 </style>
 </head>
