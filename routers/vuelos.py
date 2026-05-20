@@ -29,7 +29,7 @@ def _store(numero: str, fecha: str, data):
 async def estado_vuelo(id_reserva: int, tipo: str = "OUT"):
     # Número de vuelo desde dbo.alquileres
     vuelo_rows = query(
-        "SELECT VueloSalida, VueloEntrada FROM dbo.alquileres WHERE Id = ?",
+        "SELECT VueloSalida, VueloEntrada FROM dbo.alquileres WHERE IdReserva = ?",
         [id_reserva],
     )
     if not vuelo_rows:

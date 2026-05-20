@@ -96,7 +96,7 @@ async def ver(request: Request, id_reserva: int):
 
     tiene_finalizacion = reserva_finalizada(id_reserva)
 
-    _vuelo = query("SELECT VueloSalida, VueloEntrada FROM dbo.alquileres WHERE Id = ?", [id_reserva])
+    _vuelo = query("SELECT VueloSalida, VueloEntrada FROM dbo.alquileres WHERE IdReserva = ?", [id_reserva])
     vuelo_salida  = (_vuelo[0].get("VueloSalida")  or "").strip() if _vuelo else ""
     vuelo_entrada = (_vuelo[0].get("VueloEntrada") or "").strip() if _vuelo else ""
     vuelo_numero  = vuelo_salida if tipo == "OUT" else vuelo_entrada
