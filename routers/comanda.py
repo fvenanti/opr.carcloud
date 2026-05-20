@@ -209,6 +209,19 @@ def _build_html(tipo: str, r: dict, mov: dict, entrega: dict,
     border-radius: 8px;
     cursor: pointer;
   }}
+  .share-btn {{
+    flex: 1;
+    padding: 10px;
+    background: #1d4ed8;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: none;
+  }}
 
   /* ── Contenido ── */
   .header {{ text-align: center; margin-bottom: 4mm; }}
@@ -229,14 +242,15 @@ def _build_html(tipo: str, r: dict, mov: dict, entrega: dict,
     @page {{ size: 80mm auto; margin: 5mm; }}
     body {{ background: white; padding: 0; }}
     .page {{ box-shadow: none; margin: 0; padding: 0; width: auto; }}
-    .toolbar {{ display: none; }}
+    .toolbar {{ display: none !important; }}
   }}
 </style>
 </head>
 <body>
 <div class="toolbar">
   <a class="back-btn" href="/planilla/{r['IdReserva']}?tipo={tipo[0]}">← Volver</a>
-  <button class="print-btn" onclick="window.print()">🖨 Imprimir</button>
+  <button class="share-btn" id="shareBtn" onclick="compartir()">🖨 Imprimir</button>
+  <button class="print-btn" id="printBtn" onclick="window.print()">🖨 Imprimir</button>
 </div>
 <div class="page">
   <div class="header">
@@ -250,6 +264,21 @@ def _build_html(tipo: str, r: dict, mov: dict, entrega: dict,
   <hr class="hr">
   {cuerpo}
 </div>
+<script>
+  // Si el dispositivo soporta Web Share API (iOS Safari, Android Chrome),
+  // mostramos el botón de compartir en vez del de imprimir.
+  // El share sheet de iOS incluye "Imprimir" sin el popup de bloqueo.
+  if (navigator.share) {{
+    document.getElementById('shareBtn').style.display = 'block';
+    document.getElementById('printBtn').style.display  = 'none';
+  }}
+  function compartir() {{
+    navigator.share({{
+      title: 'Comanda ABA Rent a Car',
+      url: window.location.href
+    }}).catch(function() {{}});
+  }}
+</script>
 </body>
 </html>"""
 
