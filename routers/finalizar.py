@@ -37,7 +37,7 @@ def _html_email(nombre: str) -> str:
 
    <!-- Logo -->
    <tr><td align="center" style="padding:30px 0 20px;">
-    <p style="font-size:24px;font-weight:bold;color:#4a7c59;margin:0;letter-spacing:2px;">ABA RENT A CAR</p>
+    <img src="https://opr.aba.benvert.com.ar/static/logo.png" alt="ABA Rent a Car" width="150" style="display:block;margin:0 auto;">
    </td></tr>
 
    <!-- Subtitle -->
