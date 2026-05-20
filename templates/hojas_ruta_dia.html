@@ -38,18 +38,26 @@
 
       <!-- Indicador estado + dirección -->
       <div class="flex-shrink-0 w-7 h-7 flex items-center justify-center mt-0.5">
-        {% if m.Procesado %}
-          <!-- Hecho: círculo sólido -->
-          <div class="w-7 h-7 rounded-full {% if m.TipoMovimiento == 'OUT' %}bg-red-500{% else %}bg-green-500{% endif %}"></div>
-        {% elif m.TipoMovimiento == 'IN' %}
-          <!-- Pendiente entrada: flecha verde -->
-          <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-          </svg>
+        {% if m.TipoMovimiento == 'IN' %}
+          {% set color = 'text-green-500' %}
+          {% set flecha = 'M10 19l-7-7m0 0l7-7m-7 7h18' %}
         {% else %}
-          <!-- Pendiente salida: flecha roja -->
-          <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+          {% set color = 'text-red-500' %}
+          {% set flecha = 'M14 5l7 7m0 0l-7 7m7-7H3' %}
+        {% endif %}
+
+        {% if m.Procesado %}
+          <!-- Hecho: círculo outline + flecha adentro -->
+          <div class="w-7 h-7 rounded-full border-2 flex items-center justify-center
+                      {% if m.TipoMovimiento == 'IN' %}border-green-500{% else %}border-red-500{% endif %}">
+            <svg class="w-3.5 h-3.5 {{ color }}" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="{{ flecha }}"/>
+            </svg>
+          </div>
+        {% else %}
+          <!-- Pendiente: solo flecha -->
+          <svg class="w-5 h-5 {{ color }}" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="{{ flecha }}"/>
           </svg>
         {% endif %}
       </div>
