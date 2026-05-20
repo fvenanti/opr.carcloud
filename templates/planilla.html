@@ -100,7 +100,7 @@
 </div>
 {% endif %}
 
-{% if mostrar_in %}
+{% if mostrar_in and tiene_recepcion %}
 <div class="px-4 pb-4">
   <a href="/planilla/{{ reserva.IdReserva }}/comanda?tipo=IN"     class="flex items-center justify-center gap-2 w-full bg-gray-700 text-white font-semibold rounded-2xl py-4 text-base active:bg-gray-800 transition-colors">
     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
