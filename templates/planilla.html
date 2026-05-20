@@ -44,7 +44,7 @@
   </a>
   {% endmacro %}
 
-  {% set _ep = reserva.EstadoPago or '' %}
+  {% set _ep = (reserva.EstadoPago or '') | upper %}
   {% set pago_debe   = 'DEBE' in _ep %}
   {% set pago_pagado = 'PAGADO' in _ep %}
   {% set _pago_icon_color = 'text-green-600' if pago_pagado else ('text-red-600' if pago_debe else 'text-white') %}
