@@ -96,9 +96,11 @@
   </div>
 
   <div>
-    <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">Nafta Salida</label>
-    <input type="text" value="{{ nafta_salida ~ '%' if nafta_salida is not none else '—' }}" disabled
-           class="w-full border border-gray-100 rounded-xl px-4 py-3 text-gray-400 bg-gray-50">
+    <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">
+      Nafta Salida: <span class="font-bold text-gray-900">{{ nafta_salida ~ '%' if nafta_salida is not none else '—' }}</span>
+    </label>
+    <input type="range" min="0" max="100" step="5" value="{{ nafta_salida or 0 }}" disabled
+           class="w-full h-3 rounded-lg appearance-none cursor-pointer accent-gray-400">
   </div>
 
   <div x-data="{ nafta: {{ recepcion.NaftaEntrada or 0 }} }">
