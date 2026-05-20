@@ -216,7 +216,7 @@ def _build_html(tipo: str, r: dict, mov: dict, entrega: dict,
   .header h2 {{ font-size: 11px; margin: 0; font-weight: normal; }}
   .header .matricula {{ font-size: 18px; font-weight: bold; margin: 2mm 0 0; }}
   .hr {{ border: none; border-top: 1px dashed #555; margin: 3mm 0; }}
-  .operador {{ font-size: 10px; color: #555; margin-top: 1mm; }}
+  .operador {{ font-size: 12px; font-weight: bold; color: #000; margin-top: 1mm; }}
   .sec {{ margin-bottom: 3mm; }}
   .sec-title {{ font-weight: bold; font-size: 10px; text-transform: uppercase;
                 letter-spacing: 1px; margin-bottom: 1mm; border-bottom: 1px solid #000; }}
@@ -235,7 +235,7 @@ def _build_html(tipo: str, r: dict, mov: dict, entrega: dict,
     .header h2 {{ font-size: 20pt !important; }}
     .header .matricula {{ font-size: 32pt !important; }}
     .header div {{ font-size: 20pt !important; }}
-    .operador {{ font-size: 17pt !important; }}
+    .operador {{ font-size: 22pt !important; font-weight: bold !important; }}
     .sec-title {{ font-size: 19pt !important; border-bottom: 2px solid #000 !important; }}
     .lbl {{ font-size: 22pt !important; padding: 2mm 0 !important; font-weight: bold !important; }}
     .val {{ font-size: 22pt !important; padding: 2mm 0 !important; font-weight: bold !important; }}
