@@ -1,11 +1,7 @@
-import os, subprocess, shutil, tempfile, logging
+import logging
 from fastapi import APIRouter, Request
-from fastapi.responses import StreamingResponse, HTMLResponse
+from fastapi.responses import HTMLResponse
 from database import query
-
-from docx import Document
-from docx.shared import Mm, Pt
-from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 log = logging.getLogger(__name__)
 router = APIRouter()
@@ -33,33 +29,23 @@ WHERE IdReserva = ?
 
 _SQL_MOV = """
 SELECT TOP 1
-    [Total Alquiler]  AS TotalAlquiler,
-    [Total Abonado]   AS TotalAbonado,
-    [Total Pendiente] AS TotalPendiente,
+    [Total Alquiler]      AS TotalAlquiler,
+    [Total Abonado]       AS TotalAbonado,
+    [Total Pendiente]     AS TotalPendiente,
     [Monedas.Descripcion] AS Moneda
 FROM dbo.vw_AppSheet_Movimientos
 WHERE IdReserva = ?
 """
 
-_SQL_ENTREGA = """
-SELECT TOP 1 KmSalida, NaftaSalida FROM entregas WHERE IdReserva = ?
-"""
-
-_SQL_RECEPCION = """
-SELECT TOP 1 KmEntrada, NaftaEntrada FROM recepciones WHERE IdReserva = ?
-"""
-
-_SQL_PAGOS = """
-SELECT Importe, Moneda, TipoPago, TipoCambio, Concepto
-FROM pagos WHERE IdReserva = ?
-ORDER BY FechaPago, Id
-"""
+_SQL_ENTREGA   = "SELECT TOP 1 KmSalida,  NaftaSalida  FROM entregas    WHERE IdReserva = ?"
+_SQL_RECEPCION = "SELECT TOP 1 KmEntrada, NaftaEntrada FROM recepciones  WHERE IdReserva = ?"
+_SQL_PAGOS     = "SELECT Importe, Moneda, TipoPago, TipoCambio, Concepto FROM pagos WHERE IdReserva = ? ORDER BY FechaPago, Id"
 
 # ── Formato ────────────────────────────────────────────────────────────────────
 
 def _fmt_num(val) -> str:
     if val is None or val == "":
-        return ""
+        return "—"
     try:
         return f"{int(round(float(val))):,}".replace(",", ".")
     except (ValueError, TypeError):
@@ -68,7 +54,7 @@ def _fmt_num(val) -> str:
 
 def _fmt_importe(val, moneda="Pesos") -> str:
     if val is None or val == "":
-        return ""
+        return "—"
     try:
         symbol = "US$" if "dolar" in (moneda or "").lower() else "$"
         return f"{symbol} {int(round(float(val))):,}".replace(",", ".")
@@ -78,148 +64,175 @@ def _fmt_importe(val, moneda="Pesos") -> str:
 
 def _fmt_fecha(val) -> str:
     if val is None:
-        return ""
+        return "—"
     if hasattr(val, "strftime"):
         return val.strftime("%d/%m/%Y")
     return str(val)
 
 
-# ── DOCX builder ───────────────────────────────────────────────────────────────
+def _v(val) -> str:
+    return str(val) if val else "—"
 
-_SEP = "─" * 34
+# ── HTML builder ───────────────────────────────────────────────────────────────
 
-
-def _add(doc, text, bold=False, size=8, align=WD_ALIGN_PARAGRAPH.LEFT):
-    para = doc.add_paragraph()
-    para.alignment = align
-    para.paragraph_format.space_before = Pt(0)
-    para.paragraph_format.space_after = Pt(0)
-    run = para.add_run(text)
-    run.bold = bold
-    run.font.name = "Courier New"
-    run.font.size = Pt(size)
-    return para
+def _fila(label: str, value: str) -> str:
+    return f'<tr><td class="lbl">{label}</td><td class="val">{value}</td></tr>'
 
 
-def _kv(doc, label, value):
-    if value is None or value == "":
-        return
-    para = doc.add_paragraph()
-    para.paragraph_format.space_before = Pt(0)
-    para.paragraph_format.space_after = Pt(0)
-    rl = para.add_run(f"{label}: ")
-    rl.font.name = "Courier New"
-    rl.font.size = Pt(8)
-    rv = para.add_run(str(value))
-    rv.bold = True
-    rv.font.name = "Courier New"
-    rv.font.size = Pt(8)
+def _seccion(titulo: str, filas: list[str]) -> str:
+    rows = "\n".join(filas)
+    return f"""
+<div class="sec">
+  <div class="sec-title">{titulo}</div>
+  <table>{rows}</table>
+</div>"""
 
 
-def _build_docx(tipo: str, r: dict, mov: dict, entrega: dict,
+def _build_html(tipo: str, r: dict, mov: dict, entrega: dict,
                 recepcion: dict, pagos: list) -> str:
-    doc = Document()
 
-    # Thermal paper: 80mm wide
-    sec = doc.sections[0]
-    sec.page_width  = Mm(80)
-    sec.page_height = Mm(280)
-    sec.left_margin = sec.right_margin = Mm(4)
-    sec.top_margin  = sec.bottom_margin = Mm(5)
+    moneda = mov.get("Moneda") or r.get("Moneda") or "Pesos"
 
-    moneda = (mov.get("Moneda") or r.get("Moneda") or "Pesos")
+    secciones = []
 
-    # ── Encabezado ──────────────────────────────────────────────────────────────
-    _add(doc, "ABA RENT A CAR", bold=True, size=10, align=WD_ALIGN_PARAGRAPH.CENTER)
-    _add(doc, tipo, bold=True, size=14, align=WD_ALIGN_PARAGRAPH.CENTER)
-    _add(doc, _SEP)
-    _kv(doc, "Reserva", f"#{r['IdReserva']}")
-    _kv(doc, "Patente", r.get("MATRICULA") or "")
-    _kv(doc, "Cliente", r.get("Cliente") or "")
+    # Salida
+    secciones.append(_seccion("SALIDA", [
+        _fila("Fecha",   _fmt_fecha(r.get("FechaSalida"))),
+        _fila("Horario", _v(r.get("HorarioSalida"))),
+        _fila("Lugar",   _v(r.get("LugarSalida"))),
+    ]))
 
-    # ── Salida ──────────────────────────────────────────────────────────────────
-    _add(doc, _SEP)
-    _add(doc, "SALIDA", bold=True, size=9)
-    _kv(doc, "Fecha",   _fmt_fecha(r.get("FechaSalida")))
-    _kv(doc, "Horario", r.get("HorarioSalida") or "")
-    _kv(doc, "Lugar",   r.get("LugarSalida") or "")
+    # Devolución
+    secciones.append(_seccion("DEVOLUCIÓN", [
+        _fila("Fecha",   _fmt_fecha(r.get("FechaEntrada"))),
+        _fila("Horario", _v(r.get("HorarioEntrada"))),
+        _fila("Lugar",   _v(r.get("LugarEntrada"))),
+    ]))
 
-    # ── Devolución ──────────────────────────────────────────────────────────────
-    _add(doc, _SEP)
-    _add(doc, "DEVOLUCIÓN", bold=True, size=9)
-    _kv(doc, "Fecha",   _fmt_fecha(r.get("FechaEntrada")))
-    _kv(doc, "Horario", r.get("HorarioEntrada") or "")
-    _kv(doc, "Lugar",   r.get("LugarEntrada") or "")
+    # Tarifas
+    secciones.append(_seccion("TARIFAS", [
+        _fila("Tarifa", _fmt_importe(r.get("Tarifa"), moneda)),
+        _fila("Días",   _v(r.get("Dias"))),
+        _fila("Km",     _v(r.get("Km"))),
+    ]))
 
-    # ── Tarifas ─────────────────────────────────────────────────────────────────
-    _add(doc, _SEP)
-    _add(doc, "TARIFAS", bold=True, size=9)
-    _kv(doc, "Tarifa", _fmt_importe(r.get("Tarifa"), moneda))
-    _kv(doc, "Días",   str(r.get("Dias") or ""))
-    _kv(doc, "Km",     str(r.get("Km") or ""))
+    # Totales
+    secciones.append(_seccion("TOTALES", [
+        _fila("Total reserva",   _fmt_importe(mov.get("TotalAlquiler"),  moneda)),
+        _fila("Total abonado",   _fmt_importe(mov.get("TotalAbonado"),   moneda)),
+        _fila("Total pendiente", _fmt_importe(mov.get("TotalPendiente"), moneda)),
+    ]))
 
-    # ── Totales ─────────────────────────────────────────────────────────────────
-    _add(doc, _SEP)
-    _add(doc, "TOTALES", bold=True, size=9)
-    _kv(doc, "Total reserva",  _fmt_importe(mov.get("TotalAlquiler"), moneda))
-    _kv(doc, "Total abonado",  _fmt_importe(mov.get("TotalAbonado"), moneda))
-    _kv(doc, "Total pendiente", _fmt_importe(mov.get("TotalPendiente"), moneda))
-
-    # ── Km / Combustible ────────────────────────────────────────────────────────
-    _add(doc, _SEP)
+    # Km / Combustible
     if tipo == "SALIDA":
-        _add(doc, "KM / COMBUSTIBLE", bold=True, size=9)
-        _kv(doc, "Km salida",   _fmt_num(entrega.get("KmSalida")))
-        nafta_s = entrega.get("NaftaSalida")
-        _kv(doc, "Comb. salida", f"{int(nafta_s)}%" if nafta_s is not None else "")
+        nafta = entrega.get("NaftaSalida")
+        secciones.append(_seccion("KM / COMBUSTIBLE", [
+            _fila("Km salida",   _fmt_num(entrega.get("KmSalida"))),
+            _fila("Comb. salida", f"{int(nafta)}%" if nafta is not None else "—"),
+        ]))
     else:
-        _add(doc, "KM / COMBUSTIBLE", bold=True, size=9)
         km_e = recepcion.get("KmEntrada")
         km_s = entrega.get("KmSalida")
-        _kv(doc, "Km entrada", _fmt_num(km_e))
-        if km_e is not None and km_s is not None:
-            try:
-                dif = int(km_e) - int(km_s)
-                _kv(doc, "Diferencia Km", _fmt_num(dif))
-            except (TypeError, ValueError):
-                pass
-        nafta_e = recepcion.get("NaftaEntrada")
-        _kv(doc, "Comb. entrada", f"{int(nafta_e)}%" if nafta_e is not None else "")
+        nafta = recepcion.get("NaftaEntrada")
+        try:
+            dif = _fmt_num(int(km_e) - int(km_s)) if km_e is not None and km_s is not None else "—"
+        except (TypeError, ValueError):
+            dif = "—"
+        secciones.append(_seccion("KM / COMBUSTIBLE", [
+            _fila("Km entrada",    _fmt_num(km_e)),
+            _fila("Diferencia Km", dif),
+            _fila("Comb. entrada", f"{int(nafta)}%" if nafta is not None else "—"),
+        ]))
 
-    # ── Pagos ───────────────────────────────────────────────────────────────────
+    # Pagos
     if pagos:
-        _add(doc, _SEP)
-        _add(doc, "PAGOS", bold=True, size=9)
+        filas_pagos = []
         for p in pagos:
             moneda_p = p.get("Moneda") or "Pesos"
-            importe  = _fmt_importe(p.get("Importe"), moneda_p)
-            concepto = p.get("Concepto") or ""
-            tipo_p   = p.get("TipoPago") or ""
-            _add(doc, f"{importe}  {tipo_p}  {concepto}")
+            filas_pagos.append(_fila(
+                p.get("TipoPago") or "",
+                f'{_fmt_importe(p.get("Importe"), moneda_p)}'
+                + (f' — {p["Concepto"]}' if p.get("Concepto") else "")
+            ))
+        secciones.append(_seccion("PAGOS", filas_pagos))
 
-    _add(doc, _SEP)
+    cuerpo = "\n".join(secciones)
 
-    tmpdir   = tempfile.mkdtemp()
-    out_path = os.path.join(tmpdir, "comanda.docx")
-    doc.save(out_path)
-    return out_path
+    return f"""<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Comanda {r['IdReserva']}</title>
+<style>
+  /* ── Pantalla ── */
+  body {{
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    margin: 0;
+    padding: 8px;
+    background: #f5f5f5;
+  }}
+  .page {{
+    background: white;
+    width: 72mm;
+    margin: 0 auto;
+    padding: 6mm 4mm;
+    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  }}
+  .print-btn {{
+    display: block;
+    width: 72mm;
+    margin: 12px auto;
+    padding: 10px;
+    background: #1d4ed8;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }}
 
+  /* ── Contenido ── */
+  .header {{ text-align: center; margin-bottom: 4mm; }}
+  .header h1 {{ font-size: 15px; margin: 0 0 1mm; letter-spacing: 2px; }}
+  .header h2 {{ font-size: 11px; margin: 0; font-weight: normal; }}
+  .header .matricula {{ font-size: 18px; font-weight: bold; margin: 2mm 0 0; }}
+  .hr {{ border: none; border-top: 1px dashed #555; margin: 3mm 0; }}
+  .sec {{ margin-bottom: 3mm; }}
+  .sec-title {{ font-weight: bold; font-size: 10px; text-transform: uppercase;
+                letter-spacing: 1px; margin-bottom: 1mm; border-bottom: 1px solid #000; }}
+  table {{ width: 100%; border-collapse: collapse; }}
+  .lbl {{ color: #444; width: 45%; padding: 0.5mm 0; vertical-align: top; }}
+  .val {{ font-weight: bold; padding: 0.5mm 0; }}
 
-def _to_pdf(docx_path: str) -> str:
-    out_dir = os.path.dirname(docx_path)
-    env = os.environ.copy()
-    env["HOME"] = out_dir
-    result = subprocess.run(
-        ["libreoffice", "--headless", "--norestore",
-         "--convert-to", "pdf", "--outdir", out_dir, docx_path],
-        capture_output=True, text=True, timeout=90, env=env
-    )
-    if result.returncode != 0:
-        raise RuntimeError(f"LibreOffice: {result.stderr}")
-    pdf = os.path.splitext(docx_path)[0] + ".pdf"
-    if not os.path.isfile(pdf):
-        raise RuntimeError("PDF no generado")
-    return pdf
+  /* ── Impresión ── */
+  @media print {{
+    @page {{ size: 80mm auto; margin: 5mm; }}
+    body {{ background: white; padding: 0; }}
+    .page {{ box-shadow: none; margin: 0; padding: 0; width: auto; }}
+    .print-btn {{ display: none; }}
+  }}
+</style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">🖨 Imprimir</button>
+<div class="page">
+  <div class="header">
+    <h1>ABA RENT A CAR</h1>
+    <h2>— {tipo} —</h2>
+    <div class="matricula">{r.get('MATRICULA','')}</div>
+    <div>Reserva #{r['IdReserva']}</div>
+    <div>{r.get('Cliente','')}</div>
+  </div>
+  <hr class="hr">
+  {cuerpo}
+</div>
+<script>window.onload = function(){{ window.print(); }};</script>
+</body>
+</html>"""
 
 
 # ── Endpoint ───────────────────────────────────────────────────────────────────
@@ -238,30 +251,11 @@ async def comanda(request: Request, id_reserva: int, tipo: str = "OUT"):
     rec_rows  = query(_SQL_RECEPCION, [id_reserva])
     pago_rows = query(_SQL_PAGOS,     [id_reserva])
 
-    mov      = mov_rows[0]  if mov_rows  else {}
-    entrega  = ent_rows[0]  if ent_rows  else {}
-    recepcion = rec_rows[0] if rec_rows  else {}
+    mov       = mov_rows[0]  if mov_rows  else {}
+    entrega   = ent_rows[0]  if ent_rows  else {}
+    recepcion = rec_rows[0]  if rec_rows  else {}
 
     titulo = "ENTRADA" if tipo == "IN" else "SALIDA"
 
-    try:
-        docx_path = _build_docx(titulo, r, mov, entrega, recepcion, pago_rows)
-        pdf_path  = _to_pdf(docx_path)
-    except Exception as e:
-        log.exception("Error generando comanda")
-        return HTMLResponse(f"Error generando comanda: {e}", status_code=500)
-
-    tmpdir = os.path.dirname(docx_path)
-
-    def iterfile():
-        try:
-            with open(pdf_path, "rb") as f:
-                yield from f
-        finally:
-            shutil.rmtree(tmpdir, ignore_errors=True)
-
-    return StreamingResponse(
-        iterfile(),
-        media_type="application/pdf",
-        headers={"Content-Disposition": f'inline; filename="comanda_{id_reserva}.pdf"'},
-    )
+    html = _build_html(titulo, r, mov, entrega, recepcion, pago_rows)
+    return HTMLResponse(html)
