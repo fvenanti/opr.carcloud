@@ -21,23 +21,33 @@
 <!-- Botones de acción -->
 <div class="px-4 py-3 grid grid-cols-3 gap-3">
 
-  {% macro accion_btn(href, icono, label, done, blue=false) %}
+  {% macro accion_btn(href, icono, label, done, blue=false, rojo=false, extra='') %}
   <a href="{{ href }}"
      class="flex flex-col items-center gap-1.5 bg-white border rounded-2xl py-4 px-2 shadow-sm active:bg-gray-50 transition-colors
-            {% if blue %}border-blue-200{% elif done %}border-green-200{% else %}border-gray-100{% endif %}">
+            {% if blue %}border-blue-200{% elif rojo %}border-red-200{% elif done %}border-green-200{% else %}border-gray-100{% endif %}">
     <div class="w-12 h-12 rounded-full flex items-center justify-center
-                {% if blue %}bg-blue-100{% elif done %}bg-green-100{% else %}bg-green-600{% endif %}">
+                {% if blue %}bg-blue-100{% elif rojo %}bg-red-100{% elif done %}bg-green-100{% else %}bg-green-600{% endif %}">
       {{ icono | safe }}
     </div>
     <span class="text-xs text-center leading-tight font-medium
-                 {% if blue %}text-blue-700{% elif done %}text-green-700{% else %}text-gray-700{% endif %}">
+                 {% if blue %}text-blue-700{% elif rojo %}text-red-700{% elif done %}text-green-700{% else %}text-gray-700{% endif %}">
       {{ label }}
     </span>
+    {% if extra %}
+    <span class="text-xs font-bold {% if rojo %}text-red-600{% else %}text-gray-500{% endif %}">{{ extra }}</span>
+    {% endif %}
     {% if blue or done %}
     <div class="w-2 h-2 rounded-full {% if blue %}bg-blue-500{% else %}bg-green-500{% endif %}"></div>
+    {% elif rojo %}
+    <div class="w-2 h-2 rounded-full bg-red-500"></div>
     {% endif %}
   </a>
   {% endmacro %}
+
+  {% set _ep = reserva.EstadoPago or '' %}
+  {% set pago_debe   = 'DEBE' in _ep %}
+  {% set pago_pagado = 'PAGADO' in _ep %}
+  {% set _pago_icon_color = 'text-green-600' if pago_pagado else ('text-red-600' if pago_debe else 'text-white') %}
 
   {% set icon_conductor  = '<svg class="w-6 h-6 ' ~ ('text-blue-600' if contrato_listo else ('text-green-600' if tiene_conductor  else 'text-white')) ~ '" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>' %}
   {% set icon_adicionales = '<svg class="w-6 h-6 ' ~ ('text-blue-600' if contrato_listo else ('text-green-600' if tiene_adicionales else 'text-white')) ~ '" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2"/></svg>' %}
@@ -48,14 +58,14 @@
   {{ accion_btn('/planilla/' ~ reserva.IdReserva ~ '/conductor',   icon_conductor,   'DATOS DE CONDUCTOR PRINCIPAL',    tiene_conductor,   contrato_listo) }}
   {{ accion_btn('/planilla/' ~ reserva.IdReserva ~ '/adicionales', icon_adicionales, 'DATOS DE LA RESERVA',            tiene_adicionales, contrato_listo) }}
   {{ accion_btn('/planilla/' ~ reserva.IdReserva ~ '/pagos',
-    '<svg class="w-6 h-6 ' ~ ('text-green-600' if tiene_pagos else 'text-white') ~ '" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
-    'AGREGAR PAGOS', tiene_pagos) }}
+    '<svg class="w-6 h-6 ' ~ _pago_icon_color ~ '" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+    'AGREGAR PAGOS', pago_pagado, rojo=pago_debe, extra='DEBE' if pago_debe else '') }}
   {{ accion_btn('/planilla/' ~ reserva.IdReserva ~ '/entregas', icon_entrega, 'DATOS DEL VEHÍCULO A LA ENTREGA', tiene_entrega, contrato_listo) }}
   {{ accion_btn('/planilla/' ~ reserva.IdReserva ~ '/firmas',   icon_firma,   'FIRMA DE CONTRATO',               tiene_firma,   contrato_listo) }}
   {% elif mostrar_in %}
   {{ accion_btn('/planilla/' ~ reserva.IdReserva ~ '/pagos',
-    '<svg class="w-6 h-6 ' ~ ('text-green-600' if tiene_pagos else 'text-white') ~ '" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
-    'AGREGAR PAGOS', tiene_pagos) }}
+    '<svg class="w-6 h-6 ' ~ _pago_icon_color ~ '" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+    'AGREGAR PAGOS', pago_pagado, rojo=pago_debe, extra='DEBE' if pago_debe else '') }}
   {{ accion_btn(
     '/planilla/' ~ reserva.IdReserva ~ '/recepcion',
     '<svg class="w-6 h-6 ' ~ ('text-green-600' if tiene_recepcion else 'text-white') ~ '" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>',
