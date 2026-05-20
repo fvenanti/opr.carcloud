@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from database import query
 from shared_templates import templates
-from datetime import timedelta
+from datetime import date, timedelta
 from utils import hoy_arg
 
 router = APIRouter()
