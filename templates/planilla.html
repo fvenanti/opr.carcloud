@@ -71,7 +71,7 @@
 </div>
 
 {% if contrato_listo %}
-<div class="px-4 pb-4">
+<div class="px-4 pb-2">
   <a href="/planilla/{{ reserva.IdReserva }}/enviar-contrato"
      class="relative flex items-center justify-center gap-2 w-full bg-blue-600 text-white font-semibold rounded-2xl py-4 text-base active:bg-blue-700 transition-colors">
     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -83,6 +83,29 @@
       {{ envios_count }}
     </span>
     {% endif %}
+  </a>
+</div>
+{% if tipo == 'OUT' %}
+<div class="px-4 pb-4">
+  <a href="/planilla/{{ reserva.IdReserva }}/comanda?tipo=OUT" target="_blank"
+     class="flex items-center justify-center gap-2 w-full bg-gray-700 text-white font-semibold rounded-2xl py-4 text-base active:bg-gray-800 transition-colors">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+    </svg>
+    Generar Comanda
+  </a>
+</div>
+{% endif %}
+{% endif %}
+
+{% if tipo == 'IN' and reserva.EstadoReserva == 'Efectiva' %}
+<div class="px-4 pb-4">
+  <a href="/planilla/{{ reserva.IdReserva }}/comanda?tipo=IN" target="_blank"
+     class="flex items-center justify-center gap-2 w-full bg-gray-700 text-white font-semibold rounded-2xl py-4 text-base active:bg-gray-800 transition-colors">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+    </svg>
+    Generar Comanda
   </a>
 </div>
 {% endif %}
