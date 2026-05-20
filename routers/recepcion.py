@@ -35,11 +35,12 @@ async def ver(request: Request, id_reserva: int):
     recepcion = rows[0] if rows else {}
 
     res = query("""
-        SELECT [Km Salida] AS KmSalida, Km, [Km adicional] AS KmAdicional,
-               [Monedas.Descripcion] AS Moneda
+        SELECT [Km Salida] AS KmSalida, [Nafta Salida] AS NaftaSalida,
+               Km, [Km adicional] AS KmAdicional, [Monedas.Descripcion] AS Moneda
         FROM dbo.vw_AppSheet_Reservas WHERE IdReserva = ?
     """, [id_reserva])
     km_salida      = int(res[0]["KmSalida"] or 0)      if res else 0
+    nafta_salida   = res[0]["NaftaSalida"]              if res else None
     km_disponible  = int(res[0]["Km"] or 0)            if res else 0
     km_adicional   = float(res[0]["KmAdicional"] or 0) if res else 0
     moneda         = (res[0]["Moneda"] or "Pesos")     if res else "Pesos"
@@ -51,6 +52,7 @@ async def ver(request: Request, id_reserva: int):
         "recepcion":     recepcion,
         "nombre_op":     nombre_op,
         "km_salida":     km_salida,
+        "nafta_salida":  nafta_salida,
         "km_disponible": km_disponible,
         "km_adicional":  km_adicional,
         "moneda":        moneda,
