@@ -59,7 +59,7 @@
 <form method="post" action="/planilla/{{ id_reserva }}/entregas" enctype="multipart/form-data"
       class="px-4 pt-4 space-y-4"
       x-data="{ fotoError: false, kmError: false, errorMsg: '' }"
-      @submit.prevent="
+      @submit="
         try {
           let errors = [];
           let km = parseInt($el.querySelector('[name=km_salida]').value);
@@ -68,8 +68,8 @@
           let faltantes = [...$el.querySelectorAll('[data-foto-req]')].filter(d => !d.querySelector('img[src^=blob]'));
           fotoError = faltantes.length > 0;
           if (fotoError) errors.push('Fotos faltantes: ' + faltantes.map(d=>d.dataset.fotoReq).join(', '));
-          if (errors.length) { errorMsg = errors.join(' · '); window.scrollTo({top:9999,behavior:'smooth'}); } else { errorMsg=''; $el.submit(); }
-        } catch(e) { $el.submit(); }
+          if (errors.length) { $event.preventDefault(); errorMsg = errors.join(' · '); window.scrollTo({top:9999,behavior:'smooth'}); } else { errorMsg=''; }
+        } catch(e) {}
       ">
 
   <div>
