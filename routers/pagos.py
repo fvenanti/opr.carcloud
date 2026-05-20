@@ -20,11 +20,20 @@ async def ver(request: Request, id_reserva: int):
     )
     total_pendiente = pendiente_rows[0]["TotalPendiente"] if pendiente_rows else None
 
+    tipos_pago = query(
+        "SELECT [Id_Tipo Pago] AS id, [Descripción] AS nombre FROM dbo.[Tipos Pago] ORDER BY [Id_Tipo Pago]"
+    )
+    conceptos = query(
+        "SELECT Id_Concepto AS id, Concepto AS nombre FROM dbo.Conceptos ORDER BY Id_Concepto"
+    )
+
     return templates.TemplateResponse("pagos.html", {
         "request":         request,
         "id_reserva":      id_reserva,
         "pagos":           pagos,
         "total_pendiente": total_pendiente,
+        "tipos_pago":      tipos_pago,
+        "conceptos":       conceptos,
         "hoy":             hoy_arg().isoformat(),
         "ok":              request.query_params.get("ok"),
     })

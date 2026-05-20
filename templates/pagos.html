@@ -81,10 +81,10 @@
     </div>
 
     <div>
-      <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">Tipo de Pago</label>
-      <select name="tipo_pago" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 bg-white focus:outline-none focus:border-green-500">
-        {% for opt in ['Efectivo','Tarjeta Débito','Tarjeta Crédito','Transferencia','Otro'] %}
-        <option>{{ opt }}</option>
+      <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">Tipo de Pago <span class="text-red-500">*</span></label>
+      <select name="tipo_pago" required class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 bg-white focus:outline-none focus:border-green-500">
+        {% for t in tipos_pago %}
+        <option value="{{ t.nombre }}">{{ t.nombre }}</option>
         {% endfor %}
       </select>
     </div>
@@ -96,10 +96,10 @@
     </div>
 
     <div>
-      <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">Concepto</label>
-      <select name="concepto" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 bg-white focus:outline-none focus:border-green-500">
-        {% for opt in ['Alquiler','Adicional','Tasa Aeropuerto','Seguro','Depósito','Otro'] %}
-        <option>{{ opt }}</option>
+      <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">Concepto <span class="text-red-500">*</span></label>
+      <select name="concepto" required class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 bg-white focus:outline-none focus:border-green-500">
+        {% for c in conceptos %}
+        <option value="{{ c.nombre }}">{{ c.nombre }}</option>
         {% endfor %}
       </select>
     </div>
