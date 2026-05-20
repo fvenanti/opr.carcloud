@@ -230,7 +230,6 @@ def _build_html(tipo: str, r: dict, mov: dict, entrega: dict,
   <hr class="hr">
   {cuerpo}
 </div>
-<script>window.onload = function(){{ window.print(); }};</script>
 </body>
 </html>"""
 
