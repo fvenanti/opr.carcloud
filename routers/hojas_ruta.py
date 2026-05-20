@@ -105,7 +105,7 @@ async def dia(request: Request, fecha: str):
     procesados = set()
     if ids_out:
         ph = ",".join("?" * len(ids_out))
-        rows = query(f"SELECT IdReserva FROM entregas WHERE IdReserva IN ({ph})", ids_out)
+        rows = query(f"SELECT IdReserva FROM opr.mails_enviados WHERE IdReserva IN ({ph})", ids_out)
         procesados |= {r["IdReserva"] for r in rows}
     if ids_in:
         procesados |= {id_r for id_r in ids_in if os.path.isfile(flag_path(id_r))}
