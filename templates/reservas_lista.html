@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Reservas{% endblock %}
+{% block header_title %}RESERVAS{% endblock %}
+
+{% block content %}
+
+  <!-- Buscador (server-side) -->
+  <form method="get" action="/reservas" class="px-4 py-3 bg-white border-b border-gray-100 sticky top-14 z-30">
+    <div class="relative flex gap-2">
+      <div class="relative flex-1">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input type="search" name="q" value="{{ q }}" placeholder="Nº reserva, patente o apellido…"
+               class="w-full pl-9 pr-4 py-2 bg-gray-100 rounded-xl text-sm text-gray-900 placeholder-gray-400
+                      focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition-colors">
+      </div>
+      {% if q %}
+      <a href="/reservas" class="px-3 py-2 text-gray-500 text-sm font-medium rounded-xl active:bg-gray-100 flex items-center">
+        Limpiar
+      </a>
+      {% else %}
+      <button type="submit"
+              class="px-4 py-2 bg-primary-600 text-white text-sm font-semibold rounded-xl active:bg-primary-700 transition-colors">
+        Buscar
+      </button>
+      {% endif %}
+    </div>
+  </form>
+
+  {% if not reservas %}
+  <div class="flex flex-col items-center justify-center py-20 text-gray-400">
+    <svg class="w-10 h-10 mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+    </svg>
+    <p class="text-sm">{% if q %}Sin resultados para "{{ q }}"{% else %}Sin reservas próximas{% endif %}</p>
+  </div>
+  {% else %}
+
+  <div class="divide-y divide-gray-100 bg-white mt-2">
+    {% for r in reservas %}
+    <a href="/planilla/{{ r.IdReserva }}"
+       class="flex items-start px-4 py-3 gap-3 active:bg-gray-50 transition-colors">
+
+      <!-- Número de reserva -->
+      <div class="flex-shrink-0 w-10 text-center mt-0.5">
+        <span class="text-xs font-bold text-gray-400">#{{ r.IdReserva }}</span>
+      </div>
+
+      <!-- Datos -->
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-gray-900 text-sm truncate">{{ r.Cliente or '—' }}</p>
+        <div class="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5">
+          {% if r.MATRICULA %}
+          <span class="text-xs text-gray-600 font-medium">A{{ r.MATRICULA }}</span>
+          {% endif %}
+          {% if r.FechaSalida %}
+          <span class="text-xs text-gray-500">
+            {{ r.FechaSalida.strftime('%d/%m') if r.FechaSalida else '' }}
+            {% if r.FechaEntrada %} → {{ r.FechaEntrada.strftime('%d/%m') }}{% endif %}
+          </span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Estado badge + chevron -->
+      <div class="flex-shrink-0 flex flex-col items-end gap-1 mt-0.5">
+        <span class="text-xs font-medium px-2 py-0.5 rounded-full {{ r.EstadoBadgeClass }}">{{ r.EstadoLabel }}</span>
+        <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+      </div>
+
+    </a>
+    {% endfor %}
+  </div>
+
+  {% if not q %}
+  <p class="text-xs text-center text-gray-400 py-3">Últimas reservas activas · Buscá por número, patente o apellido</p>
+  {% endif %}
+
+  {% endif %}
+
+{% endblock %}

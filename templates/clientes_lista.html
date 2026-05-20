@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Clientes{% endblock %}
+{% block header_title %}CLIENTES{% endblock %}
+
+{% block content %}
+
+  <!-- Buscador (server-side) -->
+  <form method="get" action="/clientes" class="px-4 py-3 bg-white border-b border-gray-100 sticky top-14 z-30">
+    <div class="relative flex gap-2">
+      <div class="relative flex-1">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input type="search" name="q" value="{{ q }}" placeholder="Apellido, nombre o DNI…" autofocus
+               class="w-full pl-9 pr-4 py-2 bg-gray-100 rounded-xl text-sm text-gray-900 placeholder-gray-400
+                      focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition-colors">
+      </div>
+      <button type="submit"
+              class="px-4 py-2 bg-primary-600 text-white text-sm font-semibold rounded-xl active:bg-primary-700 transition-colors">
+        Buscar
+      </button>
+    </div>
+  </form>
+
+  {% if not q %}
+  <div class="flex flex-col items-center justify-center py-20 text-gray-400">
+    <svg class="w-10 h-10 mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+    </svg>
+    <p class="text-sm">Ingresá un apellido, nombre o DNI</p>
+  </div>
+
+  {% elif not clientes %}
+  <div class="flex flex-col items-center justify-center py-20 text-gray-400">
+    <p class="text-sm">Sin resultados para "{{ q }}"</p>
+  </div>
+
+  {% else %}
+  <div class="divide-y divide-gray-100 bg-white mt-2">
+    {% for c in clientes %}
+    <div class="px-4 py-3">
+      <p class="font-semibold text-gray-900 text-sm">
+        {{ c.Apellido or '' }}{% if c.Nombre %}, {{ c.Nombre }}{% endif %}
+      </p>
+      <div class="flex flex-wrap gap-x-4 gap-y-0.5 mt-0.5">
+        {% if c.DNI %}
+        <span class="text-xs text-gray-500">DNI {{ c.DNI }}</span>
+        {% endif %}
+        {% if c.Telefono %}
+        <a href="tel:{{ c.Telefono }}" class="text-xs text-blue-600">{{ c.Telefono }}</a>
+        {% endif %}
+        {% if c.Mail %}
+        <a href="mailto:{{ c.Mail }}" class="text-xs text-blue-600 truncate max-w-[200px]">{{ c.Mail }}</a>
+        {% endif %}
+      </div>
+      {% if c.Licencia %}
+      <p class="text-xs text-gray-400 mt-0.5">Lic. {{ c.Licencia }}</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% if clientes|length == 60 %}
+  <p class="text-xs text-center text-gray-400 py-3">Mostrando los primeros 60 resultados. Refiná la búsqueda.</p>
+  {% else %}
+  <p class="text-xs text-center text-gray-400 py-3">{{ clientes|length }} resultado{% if clientes|length != 1 %}s{% endif %}</p>
+  {% endif %}
+  {% endif %}
+
+{% endblock %}

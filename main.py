@@ -7,7 +7,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
-from routers import auth, hojas_ruta, planilla, conductor, adicionales, pagos, entregas, firmas, recepcion, contrato
+from routers import auth, hojas_ruta, planilla, conductor, adicionales, pagos, entregas, firmas, recepcion, contrato, vehiculos, clientes, reservas
 import uvicorn
 
 app = FastAPI(title="CarCloud OPR", version="1.0")
@@ -30,6 +30,9 @@ app.include_router(entregas.router,   prefix="/planilla",   tags=["Entregas"])
 app.include_router(firmas.router,     prefix="/planilla",   tags=["Firmas"])
 app.include_router(recepcion.router,  prefix="/planilla",   tags=["Recepcion"])
 app.include_router(contrato.router,   prefix="/planilla",   tags=["Contrato"])
+app.include_router(vehiculos.router,  prefix="/vehiculos",  tags=["Vehiculos"])
+app.include_router(clientes.router,   prefix="/clientes",   tags=["Clientes"])
+app.include_router(reservas.router,   prefix="/reservas",   tags=["Reservas"])
 
 @app.get("/", response_class=HTMLResponse)
 async def root():

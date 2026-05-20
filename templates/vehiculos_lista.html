@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Vehículos{% endblock %}
+{% block header_title %}VEHÍCULOS{% endblock %}
+
+{% block content %}
+<div x-data="{ q: '' }">
+
+  <!-- Buscador -->
+  <div class="px-4 py-3 bg-white border-b border-gray-100 sticky top-14 z-30">
+    <div class="relative">
+      <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <input type="search" x-model="q" placeholder="Patente, marca o modelo…"
+             class="w-full pl-9 pr-4 py-2 bg-gray-100 rounded-xl text-sm text-gray-900 placeholder-gray-400
+                    focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition-colors">
+    </div>
+  </div>
+
+  <!-- Lista -->
+  {% if not vehiculos %}
+  <div class="flex flex-col items-center justify-center py-20 text-gray-400">
+    <p class="text-sm">Sin vehículos disponibles</p>
+  </div>
+  {% endif %}
+
+  <div class="divide-y divide-gray-100 bg-white mt-2">
+    {% for v in vehiculos %}
+    <div class="flex items-center px-4 py-3 gap-3"
+         x-show="!q || '{{ (v.MATRICULA or '') ~ ' ' ~ (v.Marca or '') ~ ' ' ~ (v.Modelo or '') }}'.toLowerCase().includes(q.toLowerCase())"
+         x-cloak>
+
+      <!-- Estado dot -->
+      <div class="flex-shrink-0">
+        {% if v.Estado == 'Habilitado' %}
+          <span class="block w-2.5 h-2.5 rounded-full bg-green-500"></span>
+        {% else %}
+          <span class="block w-2.5 h-2.5 rounded-full bg-red-400"></span>
+        {% endif %}
+      </div>
+
+      <!-- Info -->
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-gray-900 text-sm">A{{ v.MATRICULA or '' }}</p>
+        <p class="text-xs text-gray-500 truncate">{{ [v.Marca, v.Modelo] | select | join(' ') }}{% if v.Categoria %} · {{ v.Categoria }}{% endif %}</p>
+        {% if v.Sucursal or v.Ubicacion %}
+        <p class="text-xs text-gray-400 truncate mt-0.5">{{ v.Sucursal or '' }}{% if v.Ubicacion %} — {{ v.Ubicacion }}{% endif %}</p>
+        {% endif %}
+      </div>
+
+      <!-- Estado badge -->
+      <div class="flex-shrink-0 text-right">
+        {% if v.Estado == 'Habilitado' %}
+          <span class="text-xs font-medium text-green-600">{{ v.Estado }}</span>
+        {% else %}
+          <span class="text-xs font-medium text-red-500">{{ v.Estado or 'Sin estado' }}</span>
+        {% endif %}
+        {% if v.Combustible %}
+        <p class="text-xs text-gray-400 mt-0.5">{{ v.Combustible }}</p>
+        {% endif %}
+      </div>
+
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Contador -->
+  <p class="text-xs text-center text-gray-400 py-4">{{ vehiculos|length }} vehículos</p>
+
+</div>
+{% endblock %}
