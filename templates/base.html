@@ -22,10 +22,10 @@
     input, select, textarea { font-size: 16px !important; }  /* evita zoom en iOS */
   </style>
 </head>
-<body class="bg-gray-50 font-sans antialiased">
+<body class="bg-gray-50 font-sans antialiased flex flex-col overflow-hidden" style="height:100vh;height:100dvh;">
 
   {# ── Header ──────────────────────────────────────────────────────────────── #}
-  <header class="fixed top-0 left-0 right-0 z-40 bg-white border-b border-gray-100 h-14 flex items-center px-3 shadow-sm">
+  <header class="shrink-0 z-40 bg-white border-b border-gray-100 h-14 flex items-center px-3 shadow-sm">
     <div class="w-10">
       {% block header_left %}{% endblock %}
     </div>
@@ -38,7 +38,7 @@
   </header>
 
   {# ── Contenido ────────────────────────────────────────────────────────────── #}
-  <main class="pt-14 {% block main_class %}pb-20{% endblock %} min-h-screen">
+  <main class="flex-1 overflow-y-auto {% block main_class %}pb-4{% endblock %}">
     {% if ok %}
     <div class="mx-4 mt-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-green-800 text-sm flex items-center gap-2">
       <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
@@ -50,7 +50,7 @@
 
   {# ── Bottom nav ───────────────────────────────────────────────────────────── #}
   {% block bottom_nav %}
-  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 pb-safe">
+  <nav class="shrink-0 z-40 bg-white border-t border-gray-200 pb-safe">
     <div class="flex">
 
       <a href="/hojas-ruta" class="flex-1 flex flex-col items-center py-2 gap-0.5 {% if active_tab == 'hojas' %}text-primary-600{% else %}text-gray-400{% endif %}">
