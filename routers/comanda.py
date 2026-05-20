@@ -254,7 +254,7 @@ def _build_html(tipo: str, r: dict, mov: dict, entrega: dict,
     <h1>ABA RENT A CAR</h1>
     <h2>— {tipo} —</h2>
     <div class="matricula">{r.get('MATRICULA','')}</div>
-    <div>Reserva #{r['IdReserva']}</div>
+    <div class="matricula">Reserva #{r['IdReserva']}</div>
     <div>{r.get('Cliente','')}</div>
     {f'<div class="operador">Op: {operador}</div>' if operador else ''}
   </div>
