@@ -101,8 +101,22 @@
 {% endif %}
 
 {% if mostrar_in and tiene_recepcion %}
+<div class="px-4 pb-2">
+  <a href="/planilla/{{ reserva.IdReserva }}/finalizar-reserva"
+     class="flex items-center justify-center gap-2 w-full bg-green-600 text-white font-semibold rounded-2xl py-4 text-base active:bg-green-700 transition-colors">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    Finalizar Reserva
+    {% if tiene_finalizacion %}<span class="ml-1 text-xs bg-white text-green-700 rounded-full px-2 py-0.5 font-bold">✓</span>{% endif %}
+  </a>
+</div>
+{% endif %}
+
+{% if mostrar_in and tiene_recepcion and tiene_finalizacion %}
 <div class="px-4 pb-4">
-  <a href="/planilla/{{ reserva.IdReserva }}/comanda?tipo=IN"     class="flex items-center justify-center gap-2 w-full bg-gray-700 text-white font-semibold rounded-2xl py-4 text-base active:bg-gray-800 transition-colors">
+  <a href="/planilla/{{ reserva.IdReserva }}/comanda?tipo=IN"
+     class="flex items-center justify-center gap-2 w-full bg-gray-700 text-white font-semibold rounded-2xl py-4 text-base active:bg-gray-800 transition-colors">
     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
     </svg>

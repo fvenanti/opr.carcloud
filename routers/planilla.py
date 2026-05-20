@@ -2,6 +2,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from database import query
 from shared_templates import templates
+from routers.finalizar import reserva_finalizada
 
 router = APIRouter()
 
@@ -93,26 +94,29 @@ async def ver(request: Request, id_reserva: int):
     except Exception:
         envios_count = 0
 
+    tiene_finalizacion = reserva_finalizada(id_reserva)
+
     return templates.TemplateResponse("planilla.html", {
-        "request":           request,
-        "reserva":           reserva,
-        "tipo":              tipo,
-        "mostrar_out":       mostrar_out,
-        "mostrar_in":        mostrar_in,
-        "tiene_conductor":   tiene_conductor,
-        "tiene_adicionales": tiene_adicionales,
-        "tiene_pagos":       tiene_pagos,
-        "tiene_entrega":     tiene_entrega,
-        "tiene_recepcion":   tiene_recepcion,
-        "tiene_firma":       tiene_firma,
-        "contrato_listo":    contrato_listo,
-        "envios_count":      envios_count,
-        "conductor_data":    _cond[0]  if _cond  else None,
-        "adicional_data":    _adic[0]  if _adic  else None,
-        "pagos_data":        _pagos,
-        "entrega_data":      _ent[0]   if _ent   else None,
-        "recepcion_data":    _rec[0]   if _rec   else None,
-        "firma_data":        _firma[0] if _firma  else None,
-        "ok":                request.query_params.get("ok"),
-        "active_tab":        "hojas",
+        "request":             request,
+        "reserva":             reserva,
+        "tipo":                tipo,
+        "mostrar_out":         mostrar_out,
+        "mostrar_in":          mostrar_in,
+        "tiene_conductor":     tiene_conductor,
+        "tiene_adicionales":   tiene_adicionales,
+        "tiene_pagos":         tiene_pagos,
+        "tiene_entrega":       tiene_entrega,
+        "tiene_recepcion":     tiene_recepcion,
+        "tiene_firma":         tiene_firma,
+        "contrato_listo":      contrato_listo,
+        "tiene_finalizacion":  tiene_finalizacion,
+        "envios_count":        envios_count,
+        "conductor_data":      _cond[0]  if _cond  else None,
+        "adicional_data":      _adic[0]  if _adic  else None,
+        "pagos_data":          _pagos,
+        "entrega_data":        _ent[0]   if _ent   else None,
+        "recepcion_data":      _rec[0]   if _rec   else None,
+        "firma_data":          _firma[0] if _firma  else None,
+        "ok":                  request.query_params.get("ok"),
+        "active_tab":          "hojas",
     })
