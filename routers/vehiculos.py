@@ -17,14 +17,22 @@ SELECT
     v.COMBUSTIBLE        AS Combustible,
     v.UBICACION          AS Ubicacion,
     v.Categoría          AS Categoria,
-    CASE WHEN EXISTS (
-        SELECT 1 FROM dbo.vw_AppSheet_Reservas r
-        WHERE r.MATRICULA = v.MATRICULA
-          AND r.[Status_Reserva.Descripcion] NOT IN {_CANCELADAS}
-          AND CAST(GETDATE() AS DATE)
-              BETWEEN CAST(r.[Fecha Salida] AS DATE) AND CAST(r.[Fecha Entrada] AS DATE)
-    ) THEN 1 ELSE 0 END AS TieneReservaHoy
+    r.IdReserva,
+    r.[Sucursales.Sucursal]                                                         AS SucursalReserva,
+    ISNULL(r.Apellido,'') + CASE WHEN r.Nombre IS NOT NULL THEN ', ' + r.Nombre ELSE '' END AS Cliente
 FROM dbo.vw_AppSheet_Vehiculos v
+OUTER APPLY (
+    SELECT TOP 1
+        IdReserva,
+        [Sucursales.Sucursal],
+        Apellido,
+        Nombre
+    FROM dbo.vw_AppSheet_Reservas
+    WHERE MATRICULA = v.MATRICULA
+      AND [Status_Reserva.Descripcion] NOT IN {_CANCELADAS}
+      AND CAST(GETDATE() AS DATE)
+          BETWEEN CAST([Fecha Salida] AS DATE) AND CAST([Fecha Entrada] AS DATE)
+) r
 ORDER BY v.Sucursal, v.MATRICULA
 """
 
@@ -32,8 +40,8 @@ ORDER BY v.Sucursal, v.MATRICULA
 def _agrupar(vehiculos: list[dict]) -> tuple[list, list, list]:
     alquilados, taller, disponibles = [], [], []
     for v in vehiculos:
-        if v.get("TieneReservaHoy"):
-            if "taller" in (v.get("Sucursal") or "").lower():
+        if v.get("IdReserva") is not None:
+            if "taller" in (v.get("SucursalReserva") or "").lower():
                 taller.append(v)
             else:
                 alquilados.append(v)

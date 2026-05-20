@@ -17,7 +17,39 @@
     </div>
   </div>
 
-  {% macro grupo(titulo, lista, dot_class) %}
+  {% macro fila(v, con_link) %}
+  {% set match_str = (v.MATRICULA or '') ~ ' ' ~ (v.Marca or '') ~ ' ' ~ (v.Modelo or '') %}
+  {% if con_link %}
+  <a href="/planilla/{{ v.IdReserva }}"
+     class="flex items-center px-4 py-3 gap-3 active:bg-gray-50 transition-colors"
+     x-show="!q || '{{ match_str }}'.toLowerCase().includes(q.toLowerCase())" x-cloak>
+  {% else %}
+  <div class="flex items-center px-4 py-3 gap-3"
+       x-show="!q || '{{ match_str }}'.toLowerCase().includes(q.toLowerCase())" x-cloak>
+  {% endif %}
+    <div class="flex-1 min-w-0">
+      <p class="font-semibold text-gray-900 text-sm">{{ v.MATRICULA or '' }}</p>
+      <p class="text-xs text-gray-500 truncate">
+        {{ [v.Marca, v.Modelo] | select | join(' ') }}{% if v.Categoria %} · {{ v.Categoria }}{% endif %}
+      </p>
+      {% if v.Cliente %}
+      <p class="text-xs text-blue-600 truncate mt-0.5">{{ v.Cliente }}</p>
+      {% endif %}
+    </div>
+    <div class="flex-shrink-0 text-right">
+      {% if v.Combustible %}
+      <p class="text-xs text-gray-400">{{ v.Combustible }}</p>
+      {% endif %}
+      {% if con_link %}
+      <svg class="w-4 h-4 text-gray-300 ml-auto mt-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+      </svg>
+      {% endif %}
+    </div>
+  {% if con_link %}</a>{% else %}</div>{% endif %}
+  {% endmacro %}
+
+  {% macro grupo(titulo, lista, dot_class, con_link) %}
   {% if lista %}
   <div class="mt-2">
     <div class="px-4 py-2 flex items-center gap-2">
@@ -27,33 +59,16 @@
     </div>
     <div class="divide-y divide-gray-100 bg-white border-y border-gray-100">
       {% for v in lista %}
-      <div class="flex items-center px-4 py-3 gap-3"
-           x-show="!q || '{{ (v.MATRICULA or '') ~ ' ' ~ (v.Marca or '') ~ ' ' ~ (v.Modelo or '') }}'.toLowerCase().includes(q.toLowerCase())"
-           x-cloak>
-        <div class="flex-1 min-w-0">
-          <p class="font-semibold text-gray-900 text-sm">{{ v.MATRICULA or '' }}</p>
-          <p class="text-xs text-gray-500 truncate">
-            {{ [v.Marca, v.Modelo] | select | join(' ') }}{% if v.Categoria %} · {{ v.Categoria }}{% endif %}
-          </p>
-          {% if v.Sucursal or v.Ubicacion %}
-          <p class="text-xs text-gray-400 truncate mt-0.5">
-            {{ v.Sucursal or '' }}{% if v.Ubicacion %} — {{ v.Ubicacion }}{% endif %}
-          </p>
-          {% endif %}
-        </div>
-        {% if v.Combustible %}
-        <div class="flex-shrink-0 text-xs text-gray-400">{{ v.Combustible }}</div>
-        {% endif %}
-      </div>
+        {{ fila(v, con_link) }}
       {% endfor %}
     </div>
   </div>
   {% endif %}
   {% endmacro %}
 
-  {{ grupo('Alquilados', alquilados, 'bg-blue-500') }}
-  {{ grupo('Taller', taller, 'bg-orange-400') }}
-  {{ grupo('Disponibles', disponibles, 'bg-green-500') }}
+  {{ grupo('Alquilados', alquilados, 'bg-blue-500', true) }}
+  {{ grupo('Taller',     taller,     'bg-orange-400', true) }}
+  {{ grupo('Disponibles',disponibles,'bg-green-500', false) }}
 
   {% if not alquilados and not taller and not disponibles %}
   <div class="flex flex-col items-center justify-center py-20 text-gray-400">
