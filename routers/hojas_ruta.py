@@ -1,9 +1,11 @@
+import os
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from database import query
 from shared_templates import templates
 from datetime import date, timedelta
 from utils import hoy_arg
+from routers.finalizar import flag_path
 
 router = APIRouter()
 
@@ -106,9 +108,7 @@ async def dia(request: Request, fecha: str):
         rows = query(f"SELECT IdReserva FROM entregas WHERE IdReserva IN ({ph})", ids_out)
         procesados |= {r["IdReserva"] for r in rows}
     if ids_in:
-        ph = ",".join("?" * len(ids_in))
-        rows = query(f"SELECT IdReserva FROM recepciones WHERE IdReserva IN ({ph})", ids_in)
-        procesados |= {r["IdReserva"] for r in rows}
+        procesados |= {id_r for id_r in ids_in if os.path.isfile(flag_path(id_r))}
 
     for m in movimientos:
         m["Procesado"] = m["IdReserva"] in procesados
