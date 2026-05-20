@@ -43,7 +43,15 @@
 <div class="px-4 pb-4">
   <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Nuevo pago</h2>
   <form method="post" action="/planilla/{{ id_reserva }}/pagos"
-        x-data="{ moneda: 'PESO', tipo: 'Efectivo', concepto: 'Alquiler' }"
+        x-data="{ moneda: 'PESO', tc: 1, tcLoading: false,
+          fetchTC() {
+            this.tcLoading = true;
+            fetch('https://dolarapi.com/v1/dolares/oficial')
+              .then(r => r.json())
+              .then(d => { this.tc = Math.round(d.compra * 0.95); this.tcLoading = false; })
+              .catch(() => { alert('Error al obtener tipo de cambio'); this.tcLoading = false; });
+          }
+        }"
         class="space-y-4 bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
 
     <div>
@@ -91,8 +99,16 @@
 
     <div>
       <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">Tipo de Cambio</label>
-      <input type="number" name="tipo_cambio" step="0.01" min="1" value="1"
-             class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-green-500">
+      <div class="flex gap-2">
+        <input type="number" name="tipo_cambio" step="1" min="1" x-model="tc"
+               class="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-green-500">
+        <button type="button" @click="fetchTC()" :disabled="tcLoading"
+                class="shrink-0 px-3 py-3 bg-blue-50 border border-blue-200 text-blue-700 font-semibold text-xs rounded-xl active:bg-blue-100 transition-colors disabled:opacity-50 leading-tight text-center">
+          <span x-show="!tcLoading">Oficial<br>−5%</span>
+          <span x-show="tcLoading">...</span>
+        </button>
+      </div>
+      <p class="text-xs text-gray-400 mt-1" x-show="tc > 1">Compra oficial × 0.95 = <span x-text="tc"></span></p>
     </div>
 
     <div>
