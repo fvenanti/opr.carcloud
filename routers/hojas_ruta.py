@@ -14,12 +14,12 @@ SELECT fecha, COUNT(*) AS cantidad
 FROM (
     SELECT CAST([Fecha Salida] AS DATE) AS fecha
     FROM dbo.vw_AppSheet_Reservas
-    WHERE CAST([Fecha Salida] AS DATE) >= ?
+    WHERE CAST([Fecha Salida] AS DATE) BETWEEN ? AND ?
       AND [Status_Reserva.Descripcion] NOT IN {_CANCELADAS}
     UNION ALL
     SELECT CAST([Fecha Entrada] AS DATE) AS fecha
     FROM dbo.vw_AppSheet_Reservas
-    WHERE CAST([Fecha Entrada] AS DATE) >= ?
+    WHERE CAST([Fecha Entrada] AS DATE) BETWEEN ? AND ?
       AND [Status_Reserva.Descripcion] NOT IN {_CANCELADAS}
 ) t
 GROUP BY fecha
@@ -75,7 +75,9 @@ def _agrupar_por_sucursal(movimientos: list[dict]) -> dict:
 async def lista(request: Request):
     hoy = hoy_arg()
     desde = hoy - timedelta(days=5)
-    fechas = query(_SQL_FECHAS, [desde.isoformat(), desde.isoformat()])
+    hasta = hoy + timedelta(days=15)
+    fechas = query(_SQL_FECHAS, [desde.isoformat(), hasta.isoformat(),
+                                 desde.isoformat(), hasta.isoformat()])
     return templates.TemplateResponse("hojas_ruta_lista.html", {
         "request":    request,
         "fechas":     fechas,
