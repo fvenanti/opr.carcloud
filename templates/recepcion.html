@@ -47,10 +47,52 @@
            class="w-full border border-gray-100 rounded-xl px-4 py-3 text-gray-400 bg-gray-50">
   </div>
 
-  <div>
-    <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">Km Entrada <span class="text-red-500">*</span></label>
-    <input type="number" name="km_entrada" value="{{ recepcion.KmEntrada or '' }}" min="0" required
-           class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-green-500">
+  <!-- KM block -->
+  <div x-data="{
+    km_entrada: {{ recepcion.KmEntrada or 0 }},
+    km_salida:  {{ km_salida }},
+    km_disp:    {{ km_disponible }},
+    km_adic:    {{ km_adicional }},
+    get dif()  { return Math.max(0, this.km_entrada - this.km_salida) },
+    get exced(){ return Math.max(0, this.dif - this.km_disp) },
+    get monto(){ return Math.round(this.exced * this.km_adic) },
+    fmt(n)     { return n.toLocaleString('es-AR') }
+  }" class="space-y-3">
+
+    <div>
+      <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">Km Salida</label>
+      <input type="text" value="{{ km_salida }}" disabled
+             class="w-full border border-gray-100 rounded-xl px-4 py-3 text-gray-400 bg-gray-50">
+    </div>
+
+    <div>
+      <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">Km Entrada <span class="text-red-500">*</span></label>
+      <input type="number" name="km_entrada" x-model.number="km_entrada" min="0" required
+             class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-green-500">
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <div class="bg-gray-50 rounded-xl px-4 py-3">
+        <p class="text-xs text-gray-400 uppercase tracking-wide mb-0.5">Diferencia Km</p>
+        <p class="text-lg font-bold text-gray-900" x-text="fmt(dif)">—</p>
+      </div>
+      <div :class="exced > 0 ? 'bg-red-50' : 'bg-gray-50'" class="rounded-xl px-4 py-3">
+        <p class="text-xs text-gray-400 uppercase tracking-wide mb-0.5">Km excedentes</p>
+        <p class="text-lg font-bold" :class="exced > 0 ? 'text-red-600' : 'text-gray-900'" x-text="fmt(exced)">—</p>
+      </div>
+    </div>
+
+    <div x-show="exced > 0" :class="exced > 0 ? 'bg-red-50 border-red-200' : 'bg-gray-50 border-gray-100'"
+         class="border rounded-xl px-4 py-3">
+      <p class="text-xs text-gray-400 uppercase tracking-wide mb-0.5">Monto excedente</p>
+      <p class="text-xl font-bold text-red-600">
+        <span x-text="'{{ '$' if 'olar' not in moneda else 'US$' }} ' + fmt(monto)"></span>
+      </p>
+      <p class="text-xs text-gray-400 mt-0.5">
+        <span x-text="fmt(exced)"></span> km × <span x-text="fmt(km_adic)"></span>
+      </p>
+    </div>
+
   </div>
 
   <div x-data="{ nafta: {{ recepcion.NaftaEntrada or 0 }} }">

@@ -33,13 +33,29 @@ async def _guardar_foto(file: UploadFile, id_reserva: int, key: str) -> str | No
 async def ver(request: Request, id_reserva: int):
     rows = query("SELECT * FROM recepciones WHERE IdReserva = ?", [id_reserva])
     recepcion = rows[0] if rows else {}
+
+    ent = query("SELECT KmSalida FROM entregas WHERE IdReserva = ?", [id_reserva])
+    km_salida = int(ent[0]["KmSalida"] or 0) if ent else 0
+
+    res = query("""
+        SELECT Km, [Km adicional] AS KmAdicional, [Monedas.Descripcion] AS Moneda
+        FROM dbo.vw_AppSheet_Reservas WHERE IdReserva = ?
+    """, [id_reserva])
+    km_disponible  = int(res[0]["Km"] or 0)          if res else 0
+    km_adicional   = float(res[0]["KmAdicional"] or 0) if res else 0
+    moneda         = (res[0]["Moneda"] or "Pesos")    if res else "Pesos"
+
     nombre_op = request.session.get("user_nombre", "")
     return templates.TemplateResponse("recepcion.html", {
-        "request":    request,
-        "id_reserva": id_reserva,
-        "recepcion":  recepcion,
-        "nombre_op":  nombre_op,
-        "ok":         request.query_params.get("ok"),
+        "request":       request,
+        "id_reserva":    id_reserva,
+        "recepcion":     recepcion,
+        "nombre_op":     nombre_op,
+        "km_salida":     km_salida,
+        "km_disponible": km_disponible,
+        "km_adicional":  km_adicional,
+        "moneda":        moneda,
+        "ok":            request.query_params.get("ok"),
     })
 
 
