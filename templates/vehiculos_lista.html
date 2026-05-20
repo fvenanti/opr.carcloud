@@ -17,55 +17,49 @@
     </div>
   </div>
 
-  <!-- Lista -->
-  {% if not vehiculos %}
-  <div class="flex flex-col items-center justify-center py-20 text-gray-400">
-    <p class="text-sm">Sin vehículos disponibles</p>
+  {% macro grupo(titulo, lista, dot_class) %}
+  {% if lista %}
+  <div class="mt-2">
+    <div class="px-4 py-2 flex items-center gap-2">
+      <span class="block w-2 h-2 rounded-full {{ dot_class }}"></span>
+      <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">{{ titulo }}</span>
+      <span class="text-xs text-gray-400">({{ lista|length }})</span>
+    </div>
+    <div class="divide-y divide-gray-100 bg-white border-y border-gray-100">
+      {% for v in lista %}
+      <div class="flex items-center px-4 py-3 gap-3"
+           x-show="!q || '{{ (v.MATRICULA or '') ~ ' ' ~ (v.Marca or '') ~ ' ' ~ (v.Modelo or '') }}'.toLowerCase().includes(q.toLowerCase())"
+           x-cloak>
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold text-gray-900 text-sm">{{ v.MATRICULA or '' }}</p>
+          <p class="text-xs text-gray-500 truncate">
+            {{ [v.Marca, v.Modelo] | select | join(' ') }}{% if v.Categoria %} · {{ v.Categoria }}{% endif %}
+          </p>
+          {% if v.Sucursal or v.Ubicacion %}
+          <p class="text-xs text-gray-400 truncate mt-0.5">
+            {{ v.Sucursal or '' }}{% if v.Ubicacion %} — {{ v.Ubicacion }}{% endif %}
+          </p>
+          {% endif %}
+        </div>
+        {% if v.Combustible %}
+        <div class="flex-shrink-0 text-xs text-gray-400">{{ v.Combustible }}</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
   </div>
   {% endif %}
+  {% endmacro %}
 
-  <div class="divide-y divide-gray-100 bg-white mt-2">
-    {% for v in vehiculos %}
-    <div class="flex items-center px-4 py-3 gap-3"
-         x-show="!q || '{{ (v.MATRICULA or '') ~ ' ' ~ (v.Marca or '') ~ ' ' ~ (v.Modelo or '') }}'.toLowerCase().includes(q.toLowerCase())"
-         x-cloak>
+  {{ grupo('Alquilados', alquilados, 'bg-blue-500') }}
+  {{ grupo('Taller', taller, 'bg-orange-400') }}
+  {{ grupo('Disponibles', disponibles, 'bg-green-500') }}
 
-      <!-- Estado dot -->
-      <div class="flex-shrink-0">
-        {% if v.Estado == 'Habilitado' %}
-          <span class="block w-2.5 h-2.5 rounded-full bg-green-500"></span>
-        {% else %}
-          <span class="block w-2.5 h-2.5 rounded-full bg-red-400"></span>
-        {% endif %}
-      </div>
-
-      <!-- Info -->
-      <div class="flex-1 min-w-0">
-        <p class="font-semibold text-gray-900 text-sm">A{{ v.MATRICULA or '' }}</p>
-        <p class="text-xs text-gray-500 truncate">{{ [v.Marca, v.Modelo] | select | join(' ') }}{% if v.Categoria %} · {{ v.Categoria }}{% endif %}</p>
-        {% if v.Sucursal or v.Ubicacion %}
-        <p class="text-xs text-gray-400 truncate mt-0.5">{{ v.Sucursal or '' }}{% if v.Ubicacion %} — {{ v.Ubicacion }}{% endif %}</p>
-        {% endif %}
-      </div>
-
-      <!-- Estado badge -->
-      <div class="flex-shrink-0 text-right">
-        {% if v.Estado == 'Habilitado' %}
-          <span class="text-xs font-medium text-green-600">{{ v.Estado }}</span>
-        {% else %}
-          <span class="text-xs font-medium text-red-500">{{ v.Estado or 'Sin estado' }}</span>
-        {% endif %}
-        {% if v.Combustible %}
-        <p class="text-xs text-gray-400 mt-0.5">{{ v.Combustible }}</p>
-        {% endif %}
-      </div>
-
-    </div>
-    {% endfor %}
+  {% if not alquilados and not taller and not disponibles %}
+  <div class="flex flex-col items-center justify-center py-20 text-gray-400">
+    <p class="text-sm">Sin vehículos</p>
   </div>
-
-  <!-- Contador -->
-  <p class="text-xs text-center text-gray-400 py-4">{{ vehiculos|length }} vehículos</p>
+  {% endif %}
 
 </div>
 {% endblock %}
