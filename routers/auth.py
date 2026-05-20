@@ -104,27 +104,20 @@ async def auth_callback(request: Request):
             next_url = "/hojas-ruta"
         return RedirectResponse(next_url)
 
-    # Verificar que el email esté en opr.operarios (default schema = opr)
     rows = query(
-        "SELECT Id, IdOperario, Activo FROM operarios WHERE Mail = ? AND Activo = 1",
+        "SELECT Id, Nombre FROM dbo.tbl_operario WHERE Mail = ? AND Activo = 1",
         [email],
     )
     if not rows:
         return RedirectResponse(f"/login?error=no_autorizado&email={email}")
 
     op = rows[0]
-
-    # Obtener nombre del operario desde dbo.tbl_operario
-    nombre_rows = query(
-        "SELECT Nombre FROM dbo.tbl_operario WHERE Id = ?",
-        [op["IdOperario"]],
-    )
-    nombre = nombre_rows[0]["Nombre"] if nombre_rows else (info.get("name") or email)
+    nombre = op["Nombre"] or info.get("name") or email
 
     request.session["user_email"]    = email
     request.session["user_nombre"]   = nombre
     request.session["user_id"]       = int(op["Id"])
-    request.session["id_operario"]   = int(op["IdOperario"])
+    request.session["id_operario"]   = int(op["Id"])
 
     next_url = request.session.pop("next_url", "/hojas-ruta")
     if not next_url or next_url in ("/", "/login") or next_url.startswith("/static"):
