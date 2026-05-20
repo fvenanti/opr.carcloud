@@ -99,16 +99,25 @@ async def dia(request: Request, fecha: str):
     movimientos = query(_SQL_DIA, [f, f])
 
     # Enriquecer con estado OPR
-    ids = [m["IdReserva"] for m in movimientos]
     ids_out = [m["IdReserva"] for m in movimientos if m["TipoMovimiento"] == "OUT"]
     ids_in  = [m["IdReserva"] for m in movimientos if m["TipoMovimiento"] == "IN"]
     procesados = set()
+
+    _estados_out = {"efectiva", "finalizada", "finalizado"}
+    _estados_in  = {"finalizada", "finalizado"}
+
     if ids_out:
         ph = ",".join("?" * len(ids_out))
         rows = query(f"SELECT IdReserva FROM opr.mails_enviados WHERE IdReserva IN ({ph})", ids_out)
         procesados |= {r["IdReserva"] for r in rows}
+        procesados |= {m["IdReserva"] for m in movimientos
+                       if m["TipoMovimiento"] == "OUT"
+                       and (m.get("EstadoReserva") or "").strip().lower() in _estados_out}
     if ids_in:
         procesados |= {id_r for id_r in ids_in if os.path.isfile(flag_path(id_r))}
+        procesados |= {m["IdReserva"] for m in movimientos
+                       if m["TipoMovimiento"] == "IN"
+                       and (m.get("EstadoReserva") or "").strip().lower() in _estados_in}
 
     for m in movimientos:
         m["Procesado"] = m["IdReserva"] in procesados
