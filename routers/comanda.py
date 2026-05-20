@@ -89,7 +89,7 @@ def _seccion(titulo: str, filas: list[str]) -> str:
 
 
 def _build_html(tipo: str, r: dict, mov: dict, entrega: dict,
-                recepcion: dict, pagos: list) -> str:
+                recepcion: dict, pagos: list, operador: str = "") -> str:
 
     moneda = mov.get("Moneda") or r.get("Moneda") or "Pesos"
 
@@ -201,6 +201,7 @@ def _build_html(tipo: str, r: dict, mov: dict, entrega: dict,
   .header h2 {{ font-size: 11px; margin: 0; font-weight: normal; }}
   .header .matricula {{ font-size: 18px; font-weight: bold; margin: 2mm 0 0; }}
   .hr {{ border: none; border-top: 1px dashed #555; margin: 3mm 0; }}
+  .operador {{ font-size: 10px; color: #555; margin-top: 1mm; }}
   .sec {{ margin-bottom: 3mm; }}
   .sec-title {{ font-weight: bold; font-size: 10px; text-transform: uppercase;
                 letter-spacing: 1px; margin-bottom: 1mm; border-bottom: 1px solid #000; }}
@@ -226,6 +227,7 @@ def _build_html(tipo: str, r: dict, mov: dict, entrega: dict,
     <div class="matricula">{r.get('MATRICULA','')}</div>
     <div>Reserva #{r['IdReserva']}</div>
     <div>{r.get('Cliente','')}</div>
+    {f'<div class="operador">Op: {operador}</div>' if operador else ''}
   </div>
   <hr class="hr">
   {cuerpo}
@@ -254,7 +256,8 @@ async def comanda(request: Request, id_reserva: int, tipo: str = "OUT"):
     entrega   = ent_rows[0]  if ent_rows  else {}
     recepcion = rec_rows[0]  if rec_rows  else {}
 
-    titulo = "ENTRADA" if tipo == "IN" else "SALIDA"
+    titulo   = "ENTRADA" if tipo == "IN" else "SALIDA"
+    operador = request.session.get("user_nombre") or ""
 
-    html = _build_html(titulo, r, mov, entrega, recepcion, pago_rows)
+    html = _build_html(titulo, r, mov, entrega, recepcion, pago_rows, operador)
     return HTMLResponse(html)
