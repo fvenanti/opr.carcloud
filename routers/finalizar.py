@@ -98,9 +98,20 @@ async def finalizar(request: Request, id_reserva: int):
     nombre     = (rows[0]["Nombre"] or "Cliente") if rows else "Cliente"
     dest_email = (rows[0]["Mail"] or "").strip()  if rows else ""
 
+    # Crear flag siempre, independientemente de si hay email
+    try:
+        fp = flag_path(id_reserva)
+        os.makedirs(os.path.dirname(fp), exist_ok=True)
+        with open(fp, "w") as f:
+            f.write(ahora_arg().isoformat())
+    except Exception as e:
+        log.error("Error creando flag finalizar reserva %d: %s", id_reserva, e, exc_info=True)
+        return RedirectResponse(f"/planilla/{id_reserva}?tipo=IN&error=finalizar_fallo", status_code=303)
+
+    # Enviar email solo si hay dirección
     if not dest_email:
-        log.error("Finalizar reserva %d: conductor sin email", id_reserva)
-        return RedirectResponse(f"/planilla/{id_reserva}?tipo=IN&error=sin_email_cliente", status_code=303)
+        log.warning("Finalizar reserva %d: conductor sin email, se finaliza sin enviar mail", id_reserva)
+        return RedirectResponse(f"/planilla/{id_reserva}?tipo=IN&ok=finalizado", status_code=303)
 
     try:
         msg = MIMEMultipart("alternative")
@@ -112,13 +123,7 @@ async def finalizar(request: Request, id_reserva: int):
         with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as srv:
             srv.login(SMTP_USER, SMTP_PASS)
             srv.sendmail(SMTP_USER, dest_email, msg.as_string())
-
-        fp = flag_path(id_reserva)
-        os.makedirs(os.path.dirname(fp), exist_ok=True)
-        with open(fp, "w") as f:
-            f.write(ahora_arg().isoformat())
-
-        return RedirectResponse(f"/planilla/{id_reserva}?tipo=IN&ok=finalizado", status_code=303)
     except Exception as e:
-        log.error("Error finalizando reserva %d: %s", id_reserva, e, exc_info=True)
-        return RedirectResponse(f"/planilla/{id_reserva}?tipo=IN&error=finalizar_fallo", status_code=303)
+        log.error("Error enviando mail finalizar reserva %d: %s", id_reserva, e, exc_info=True)
+
+    return RedirectResponse(f"/planilla/{id_reserva}?tipo=IN&ok=finalizado", status_code=303)
