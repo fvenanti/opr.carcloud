@@ -21,14 +21,16 @@
   </div>
   {% endif %}
 
+  {% set dias_es = ['LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES','SÁBADO','DOMINGO'] %}
   {% for fila in fechas %}
   {% set d = fila.fecha %}
-  {% set dias_es = ['LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES','SÁBADO','DOMINGO'] %}
+  {% set es_finde = d.weekday() >= 5 %}
   <a href="/hojas-ruta/{{ d }}"
-     class="flex items-center px-4 py-4 bg-white active:bg-gray-50 transition-colors">
+     class="flex items-center px-4 py-4 transition-colors
+            {{ 'bg-amber-50 active:bg-amber-100' if es_finde else 'bg-white active:bg-gray-50' }}">
     <div class="flex-1">
       <span class="text-sm font-medium text-gray-900">
-        {{ d.strftime('%d/%m/%Y') }} — {{ d.strftime('%A').upper() }}
+        {{ d.strftime('%d/%m/%Y') }} — {{ dias_es[d.weekday()] }}
       </span>
     </div>
     <div class="flex items-center gap-3">

@@ -73,7 +73,7 @@ def _agrupar_por_sucursal(movimientos: list[dict]) -> dict:
 @router.get("/", response_class=HTMLResponse)
 async def lista(request: Request):
     hoy = date.today()
-    desde = hoy - timedelta(days=1)  # muestra desde ayer para ver pendientes
+    desde = hoy - timedelta(days=5)
     fechas = query(_SQL_FECHAS, [desde.isoformat(), desde.isoformat()])
     return templates.TemplateResponse("hojas_ruta_lista.html", {
         "request": request,
