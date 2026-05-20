@@ -494,6 +494,21 @@ def _fill_docx(ctx: dict, output_path: str):
                 for para in cell.paragraphs:
                     _replace_in_para(para._p, ctx)
 
+    # Encabezados y pies de página (secciones separadas en python-docx)
+    for section in doc.sections:
+        for hf in (section.header, section.footer,
+                   section.even_page_header, section.even_page_footer,
+                   section.first_page_header, section.first_page_footer):
+            if hf is None:
+                continue
+            for para in hf.paragraphs:
+                _replace_in_para(para._p, ctx)
+            for table in hf.tables:
+                for row in table.rows:
+                    for cell in row.cells:
+                        for para in cell.paragraphs:
+                            _replace_in_para(para._p, ctx)
+
     doc.save(output_path)
 
 
