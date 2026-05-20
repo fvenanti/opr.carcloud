@@ -22,17 +22,9 @@
     </div>
   </form>
 
-  {% if not q %}
+  {% if not clientes %}
   <div class="flex flex-col items-center justify-center py-20 text-gray-400">
-    <svg class="w-10 h-10 mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-    </svg>
-    <p class="text-sm">Ingresá un apellido, nombre o DNI</p>
-  </div>
-
-  {% elif not clientes %}
-  <div class="flex flex-col items-center justify-center py-20 text-gray-400">
-    <p class="text-sm">Sin resultados para "{{ q }}"</p>
+    <p class="text-sm">{% if q %}Sin resultados para "{{ q }}"{% else %}Sin clientes en el período{% endif %}</p>
   </div>
 
   {% else %}
@@ -59,11 +51,7 @@
     </div>
     {% endfor %}
   </div>
-  {% if clientes|length == 60 %}
-  <p class="text-xs text-center text-gray-400 py-3">Mostrando los primeros 60 resultados. Refiná la búsqueda.</p>
-  {% else %}
-  <p class="text-xs text-center text-gray-400 py-3">{{ clientes|length }} resultado{% if clientes|length != 1 %}s{% endif %}</p>
-  {% endif %}
+  <p class="text-xs text-center text-gray-400 py-3">{{ clientes|length }} cliente{% if clientes|length != 1 %}s{% endif %}</p>
   {% endif %}
 
 {% endblock %}
