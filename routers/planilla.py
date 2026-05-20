@@ -76,8 +76,12 @@ async def ver(request: Request, id_reserva: int):
     tiene_recepcion   = bool(_rec)
     tiene_firma       = bool(_firma)
 
+    estado = reserva.get("EstadoReserva") or ""
+    mostrar_out = tipo == "OUT" and "Confirmada" in estado
+    mostrar_in  = tipo == "IN"  and estado == "Efectiva"
+
     contrato_listo = (
-        tipo == "OUT"
+        mostrar_out
         and tiene_conductor
         and tiene_adicionales
         and tiene_entrega
@@ -93,6 +97,8 @@ async def ver(request: Request, id_reserva: int):
         "request":           request,
         "reserva":           reserva,
         "tipo":              tipo,
+        "mostrar_out":       mostrar_out,
+        "mostrar_in":        mostrar_in,
         "tiene_conductor":   tiene_conductor,
         "tiene_adicionales": tiene_adicionales,
         "tiene_pagos":       tiene_pagos,
