@@ -227,19 +227,20 @@ def _build_html(tipo: str, r: dict, mov: dict, entrega: dict,
   /* ── Impresión ── */
   @media print {{
     @page {{ size: 80mm auto; margin: 4mm; }}
-    body {{ background: white; padding: 0; font-size: 18pt; color: #000; }}
+    body {{ background: white !important; padding: 0; font-size: 22pt !important; color: #000 !important; }}
     .page {{ box-shadow: none; margin: 0; padding: 0; width: auto; }}
     .toolbar {{ display: none !important; }}
-    .header h1 {{ font-size: 22pt; }}
-    .header h2 {{ font-size: 17pt; }}
-    .header .matricula {{ font-size: 28pt; }}
-    .header div {{ font-size: 16pt; color: #000; }}
-    .operador {{ font-size: 14pt; color: #000; }}
-    .sec-title {{ font-size: 16pt; color: #000; }}
-    .lbl {{ font-size: 16pt; color: #000; padding: 1.5mm 0; }}
-    .val {{ font-size: 16pt; color: #000; padding: 1.5mm 0; }}
-    .hr {{ margin: 3mm 0; border-top: 2px dashed #000; }}
-    .sec {{ margin-bottom: 5mm; }}
+    * {{ color: #000 !important; }}
+    .header h1 {{ font-size: 26pt !important; }}
+    .header h2 {{ font-size: 20pt !important; }}
+    .header .matricula {{ font-size: 32pt !important; }}
+    .header div {{ font-size: 20pt !important; }}
+    .operador {{ font-size: 17pt !important; }}
+    .sec-title {{ font-size: 19pt !important; border-bottom: 2px solid #000 !important; }}
+    .lbl {{ font-size: 20pt !important; padding: 2mm 0 !important; }}
+    .val {{ font-size: 20pt !important; padding: 2mm 0 !important; font-weight: bold !important; }}
+    .hr {{ margin: 3mm 0; border-top: 2px dashed #000 !important; }}
+    .sec {{ margin-bottom: 6mm; }}
   }}
 </style>
 </head>
