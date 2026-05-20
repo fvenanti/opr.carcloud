@@ -90,6 +90,16 @@ def _currency_symbol(moneda: str) -> str:
     return "$"
 
 
+def _fmt_num(val) -> str:
+    """Número sin decimales y sin símbolo de moneda (cuando el template ya tiene el $)."""
+    if val is None or val == "":
+        return ""
+    try:
+        return f"{int(round(float(val))):,}".replace(",", ".")
+    except (ValueError, TypeError):
+        return str(val)
+
+
 def _fmt_importe(val, moneda: str = "Pesos") -> str:
     """Formatea un importe sin decimales con símbolo de moneda. Ej: $ 483.360"""
     if val is None or val == "":
@@ -150,8 +160,8 @@ def _build_context(id_reserva: int) -> dict:
             "Km":                  str(r.get("Km") or ""),
             "Tarifa":              _fmt_importe(r.get("Tarifa"), moneda),
             "Km adicional":        _fmt_importe(r.get("KmAdicional"), moneda),
-            "FranquiciaChoque":    _fmt_importe(r.get("FranquiciaChoque"), moneda),
-            "FranquiciaVuelco":    _fmt_importe(r.get("FranquiciaVuelco"), moneda),
+            "FranquiciaChoque":    _fmt_num(r.get("FranquiciaChoque")),
+            "FranquiciaVuelco":    _fmt_num(r.get("FranquiciaVuelco")),
         })
 
     # Totales y extras desde movimientos
