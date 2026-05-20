@@ -15,20 +15,25 @@
 {% block content %}
 
 {% macro foto_field(label, name, existing_url) %}
-<div>
+<div x-data="{ preview: null }">
   <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">{{ label }}</label>
+  <div x-show="preview" class="mb-2 rounded-xl overflow-hidden border border-green-200">
+    <img :src="preview" class="w-full h-40 object-cover" alt="{{ label }}">
+  </div>
   {% if existing_url %}
-  <div class="mb-2 rounded-xl overflow-hidden border border-gray-100">
-    <img src="{{ existing_url }}" class="w-full h-32 object-cover" alt="{{ label }}">
+  <div x-show="!preview" class="mb-2 rounded-xl overflow-hidden border border-gray-100">
+    <img src="{{ existing_url }}" class="w-full h-40 object-cover" alt="{{ label }}">
   </div>
   {% endif %}
-  <label class="flex items-center justify-center gap-2 w-full border-2 border-dashed border-gray-200 rounded-xl py-4 bg-white text-gray-500 active:bg-gray-50 cursor-pointer">
-    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+  <label :class="preview ? 'border-green-400 bg-green-50 text-green-700' : 'border-gray-200 bg-white text-gray-500'"
+         class="flex items-center justify-center gap-2 w-full border-2 border-dashed rounded-xl py-4 active:opacity-75 cursor-pointer transition-colors">
+    <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/>
       <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"/>
     </svg>
-    <span class="text-sm">{{ 'Cambiar foto' if existing_url else 'Tomar foto' }}</span>
-    <input type="file" name="{{ name }}" accept="image/*" capture="environment" class="hidden">
+    <span class="text-sm font-medium" x-text="preview ? '✓ Foto lista — tocar para cambiar' : '{{ 'Cambiar foto' if existing_url else 'Tomar foto' }}'"></span>
+    <input type="file" name="{{ name }}" accept="image/*" capture="environment" class="hidden"
+           @change="preview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null">
   </label>
 </div>
 {% endmacro %}
