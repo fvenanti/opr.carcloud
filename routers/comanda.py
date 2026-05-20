@@ -237,8 +237,8 @@ def _build_html(tipo: str, r: dict, mov: dict, entrega: dict,
     .header div {{ font-size: 20pt !important; }}
     .operador {{ font-size: 17pt !important; }}
     .sec-title {{ font-size: 19pt !important; border-bottom: 2px solid #000 !important; }}
-    .lbl {{ font-size: 20pt !important; padding: 2mm 0 !important; }}
-    .val {{ font-size: 20pt !important; padding: 2mm 0 !important; font-weight: bold !important; }}
+    .lbl {{ font-size: 22pt !important; padding: 2mm 0 !important; font-weight: bold !important; }}
+    .val {{ font-size: 22pt !important; padding: 2mm 0 !important; font-weight: bold !important; }}
     .hr {{ margin: 3mm 0; border-top: 2px dashed #000 !important; }}
     .sec {{ margin-bottom: 6mm; }}
   }}
