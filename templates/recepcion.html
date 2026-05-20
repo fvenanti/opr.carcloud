@@ -43,16 +43,18 @@
 
 <form method="post" action="/planilla/{{ id_reserva }}/recepcion" enctype="multipart/form-data"
       class="px-4 pt-4 space-y-4"
-      x-data="{ fotoError: false, kmError: false }"
+      x-data="{ fotoError: false, kmError: false, errorMsg: '' }"
       @submit.prevent="
-        let errors = [];
-        let km = parseInt($el.querySelector('[name=km_entrada]').value);
-        kmError = !km || km <= 0;
-        if (kmError) errors.push('Km Entrada debe ser mayor a 0');
-        let faltantes = [...$el.querySelectorAll('[data-foto-req]')].filter(d => !d.querySelector('img[src^=blob]'));
-        fotoError = faltantes.length > 0;
-        if (fotoError) errors.push('Fotos faltantes: ' + faltantes.map(d=>d.dataset.fotoReq).join(', '));
-        if (errors.length) { alert(errors.join('\n')); } else { $el.submit(); }
+        try {
+          let errors = [];
+          let km = parseInt($el.querySelector('[name=km_entrada]').value);
+          kmError = !km || km <= 0;
+          if (kmError) errors.push('Km Entrada debe ser mayor a 0');
+          let faltantes = [...$el.querySelectorAll('[data-foto-req]')].filter(d => !d.querySelector('img[src^=blob]'));
+          fotoError = faltantes.length > 0;
+          if (fotoError) errors.push('Fotos faltantes: ' + faltantes.map(d=>d.dataset.fotoReq).join(', '));
+          if (errors.length) { errorMsg = errors.join(' · '); window.scrollTo({top:9999,behavior:'smooth'}); } else { errorMsg=''; $el.submit(); }
+        } catch(e) { $el.submit(); }
       ">
 
   <div>
@@ -141,6 +143,10 @@
               class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-green-500 resize-none"
               >{{ recepcion.Observaciones or '' }}</textarea>
   </div>
+
+  <div x-show="errorMsg" x-cloak
+       class="bg-red-50 border border-red-300 rounded-xl px-4 py-3 text-red-700 text-sm font-semibold leading-snug"
+       x-text="errorMsg"></div>
 
   <button type="submit"
           class="w-full bg-red-600 text-white font-semibold rounded-2xl py-4 text-base active:bg-red-700 transition-colors">
