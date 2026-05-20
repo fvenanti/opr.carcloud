@@ -64,6 +64,17 @@
 
 </div>
 
+{% if not mostrar_out and not mostrar_in %}
+<div class="mx-4 mb-2 flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3">
+  <svg class="w-5 h-5 text-amber-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+  </svg>
+  <p class="text-sm text-amber-800">
+    La reserva está en estado <strong>{{ reserva.EstadoReserva or '—' }}</strong> y no se pueden cargar nuevos datos.
+  </p>
+</div>
+{% endif %}
+
 {% if mostrar_out and contrato_listo %}
 <div class="px-4 pb-2">
   <a href="/planilla/{{ reserva.IdReserva }}/enviar-contrato"
