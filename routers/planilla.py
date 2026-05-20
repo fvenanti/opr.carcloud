@@ -96,6 +96,11 @@ async def ver(request: Request, id_reserva: int):
 
     tiene_finalizacion = reserva_finalizada(id_reserva)
 
+    _vuelo = query("SELECT VueloSalida, VueloEntrada FROM dbo.alquileres WHERE Id = ?", [id_reserva])
+    vuelo_salida  = (_vuelo[0].get("VueloSalida")  or "").strip() if _vuelo else ""
+    vuelo_entrada = (_vuelo[0].get("VueloEntrada") or "").strip() if _vuelo else ""
+    vuelo_numero  = vuelo_salida if tipo == "OUT" else vuelo_entrada
+
     return templates.TemplateResponse("planilla.html", {
         "request":             request,
         "reserva":             reserva,
@@ -117,6 +122,7 @@ async def ver(request: Request, id_reserva: int):
         "entrega_data":        _ent[0]   if _ent   else None,
         "recepcion_data":      _rec[0]   if _rec   else None,
         "firma_data":          _firma[0] if _firma  else None,
+        "vuelo_numero":        vuelo_numero,
         "ok":                  request.query_params.get("ok"),
         "active_tab":          "hojas",
     })
