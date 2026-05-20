@@ -15,9 +15,6 @@ SMTP_HOST  = "smtp.gmail.com"
 SMTP_PORT  = 465
 SMTP_USER  = "info@abarentacar.com.ar"
 SMTP_PASS  = os.environ.get("SMTP_PASSWORD", "")
-DEST_EMAIL = "fvenanti@gmail.com"
-
-
 def flag_path(id_reserva: int) -> str:
     return os.path.join(UPLOAD_DIR, str(id_reserva), "finalizado.flag")
 
@@ -97,19 +94,24 @@ def _html_email(nombre: str) -> str:
 
 @router.get("/{id_reserva}/finalizar-reserva")
 async def finalizar(request: Request, id_reserva: int):
-    rows = query("SELECT Nombre FROM conductores WHERE IdReserva = ?", [id_reserva])
-    nombre = (rows[0]["Nombre"] or "Cliente") if rows else "Cliente"
+    rows = query("SELECT Nombre, Mail FROM conductores WHERE IdReserva = ?", [id_reserva])
+    nombre     = (rows[0]["Nombre"] or "Cliente") if rows else "Cliente"
+    dest_email = (rows[0]["Mail"] or "").strip()  if rows else ""
+
+    if not dest_email:
+        log.error("Finalizar reserva %d: conductor sin email", id_reserva)
+        return RedirectResponse(f"/planilla/{id_reserva}?tipo=IN&error=sin_email_cliente", status_code=303)
 
     try:
         msg = MIMEMultipart("alternative")
         msg["From"]    = f"ABA Rent a Car <{SMTP_USER}>"
-        msg["To"]      = DEST_EMAIL
+        msg["To"]      = dest_email
         msg["Subject"] = f"Contrato finalizado - Reserva {id_reserva}"
         msg.attach(MIMEText(_html_email(nombre), "html", "utf-8"))
 
         with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as srv:
             srv.login(SMTP_USER, SMTP_PASS)
-            srv.sendmail(SMTP_USER, DEST_EMAIL, msg.as_string())
+            srv.sendmail(SMTP_USER, dest_email, msg.as_string())
 
         fp = flag_path(id_reserva)
         os.makedirs(os.path.dirname(fp), exist_ok=True)
