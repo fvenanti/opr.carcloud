@@ -58,11 +58,16 @@
 
 <form method="post" action="/planilla/{{ id_reserva }}/entregas" enctype="multipart/form-data"
       class="px-4 pt-4 space-y-4"
-      x-data="{ fotoError: false }"
+      x-data="{ fotoError: false, kmError: false }"
       @submit.prevent="
+        let errors = [];
+        let km = parseInt($el.querySelector('[name=km_salida]').value);
+        kmError = !km || km <= 0;
+        if (kmError) errors.push('Km Salida debe ser mayor a 0');
         let faltantes = [...$el.querySelectorAll('[data-foto-req]')].filter(d => !d.querySelector('img[src^=blob]'));
-        if (faltantes.length) { fotoError = true; alert('Fotos requeridas: ' + faltantes.map(d=>d.dataset.fotoReq).join(', ')); }
-        else { fotoError = false; $el.submit(); }
+        fotoError = faltantes.length > 0;
+        if (fotoError) errors.push('Fotos faltantes: ' + faltantes.map(d=>d.dataset.fotoReq).join(', '));
+        if (errors.length) { alert(errors.join('\n')); } else { $el.submit(); }
       ">
 
   <div>
@@ -73,8 +78,9 @@
 
   <div>
     <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">Km Salida <span class="text-red-500">*</span></label>
-    <input type="number" name="km_salida" value="{{ entrega.KmSalida or 0 }}" min="0" required
-           class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-green-500">
+    <input type="number" name="km_salida" value="{{ entrega.KmSalida or '' }}" min="1" required
+           :class="kmError ? 'border-red-400' : 'border-gray-200'"
+           class="w-full border rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-green-500">
   </div>
 
   <div x-data="{ nafta: {{ entrega.NaftaSalida or 0 }} }">
