@@ -153,4 +153,15 @@
     Registrar Devolución
   </button>
 </form>
+
+{% if recepcion.Id %}
+<div class="px-4 pb-6 mt-2">
+  <form method="post" action="/planilla/{{ id_reserva }}/recepcion/eliminar"
+        onsubmit="return confirm('¿Eliminar el registro de recepción?')">
+    <button class="w-full border border-red-300 text-red-500 font-semibold rounded-2xl py-3 text-sm active:bg-red-50 transition-colors">
+      Eliminar registro de recepción
+    </button>
+  </form>
+</div>
+{% endif %}
 {% endblock %}

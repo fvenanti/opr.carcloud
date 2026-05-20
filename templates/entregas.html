@@ -143,4 +143,15 @@
     Guardar
   </button>
 </form>
+
+{% if entrega.Id %}
+<div class="px-4 pb-6 mt-2">
+  <form method="post" action="/planilla/{{ id_reserva }}/entregas/eliminar"
+        onsubmit="return confirm('¿Eliminar el registro de entrega?')">
+    <button class="w-full border border-red-300 text-red-500 font-semibold rounded-2xl py-3 text-sm active:bg-red-50 transition-colors">
+      Eliminar registro de entrega
+    </button>
+  </form>
+</div>
+{% endif %}
 {% endblock %}

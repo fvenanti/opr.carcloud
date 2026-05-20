@@ -130,3 +130,9 @@ async def guardar(
         ])
 
     return RedirectResponse(f"/planilla/{id_reserva}?ok=recepcion", status_code=303)
+
+
+@router.post("/{id_reserva}/recepcion/eliminar")
+async def eliminar(id_reserva: int):
+    execute("DELETE FROM recepciones WHERE IdReserva = ?", [id_reserva])
+    return RedirectResponse(f"/planilla/{id_reserva}?tipo=IN&ok=eliminado", status_code=303)

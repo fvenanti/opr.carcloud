@@ -121,3 +121,9 @@ async def guardar(
         ])
 
     return RedirectResponse(f"/planilla/{id_reserva}?ok=entrega", status_code=303)
+
+
+@router.post("/{id_reserva}/entregas/eliminar")
+async def eliminar(id_reserva: int):
+    execute("DELETE FROM entregas WHERE IdReserva = ?", [id_reserva])
+    return RedirectResponse(f"/planilla/{id_reserva}?tipo=OUT&ok=eliminado", status_code=303)
