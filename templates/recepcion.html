@@ -70,7 +70,7 @@
     km_disp:    {{ km_disponible }},
     km_adic:    {{ km_adicional }},
     get dif()  { return Math.max(0, this.km_entrada - this.km_salida) },
-    get exced(){ return this.km_disp > 0 ? Math.max(0, this.dif - this.km_disp) : 0 },
+    get exced(){ return Math.max(0, this.dif - this.km_disp) },
     get monto(){ return Math.round(this.exced * this.km_adic) },
     fmt(n)     { return n.toLocaleString('es-AR') }
   }" class="space-y-3">
