@@ -133,13 +133,15 @@ def _agrupar(vehiculos: list[dict]) -> tuple[list, list, list]:
         id_res = v.get("IdReserva")
         red   = v.get("TieneMailEnviado") or estado in ("efectiva", "finalizada", "finalizado")
         green = estado in ("finalizada", "finalizado") or (id_res and _flag_finalizado(id_res))
-        if red and not green:
-            suc_sal = (v.get("SucursalReserva") or "").lower()
-            suc_ent = (v.get("SucursalReservaEntrada") or "").lower()
-            if "taller" in suc_sal or "taller" in suc_ent:
-                taller.append(v)
-            else:
-                alquilados.append(v)
+        suc_vehiculo = (v.get("Sucursal") or "").lower()
+        suc_sal      = (v.get("SucursalReserva") or "").lower()
+        suc_ent      = (v.get("SucursalReservaEntrada") or "").lower()
+        es_taller    = "taller" in suc_vehiculo or "taller" in suc_sal or "taller" in suc_ent
+
+        if es_taller:
+            taller.append(v)
+        elif red and not green:
+            alquilados.append(v)
         else:
             disponibles.append(v)
     disponibles.sort(key=lambda x: str(x.get('ProximaSalida') or '9999-12-31'))
