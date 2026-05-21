@@ -37,8 +37,8 @@ FROM dbo.vw_AppSheet_Movimientos
 WHERE IdReserva = ?
 """
 
-_SQL_ENTREGA   = "SELECT TOP 1 KmSalida,  NaftaSalida  FROM entregas    WHERE IdReserva = ?"
-_SQL_RECEPCION = "SELECT TOP 1 KmEntrada, NaftaEntrada FROM recepciones  WHERE IdReserva = ?"
+_SQL_ENTREGA   = "SELECT TOP 1 KmSalida,  NaftaSalida,  IdOperario FROM entregas    WHERE IdReserva = ?"
+_SQL_RECEPCION = "SELECT TOP 1 KmEntrada, NaftaEntrada, IdOperario FROM recepciones  WHERE IdReserva = ?"
 _SQL_PAGOS     = "SELECT Importe, Moneda, TipoPago, TipoCambio, Concepto FROM pagos WHERE IdReserva = ? ORDER BY FechaPago, Id"
 
 # ── Formato ────────────────────────────────────────────────────────────────────
@@ -285,8 +285,13 @@ async def comanda(request: Request, id_reserva: int, tipo: str = "OUT"):
     entrega   = ent_rows[0]  if ent_rows  else {}
     recepcion = rec_rows[0]  if rec_rows  else {}
 
-    titulo   = "ENTRADA" if tipo == "IN" else "SALIDA"
-    operador = request.session.get("user_nombre") or ""
+    titulo = "ENTRADA" if tipo == "IN" else "SALIDA"
+    id_op  = (recepcion if tipo == "IN" else entrega).get("IdOperario")
+    if id_op:
+        op_rows  = query("SELECT Nombre FROM dbo.tbl_operario WHERE Id = ?", [id_op])
+        operador = op_rows[0]["Nombre"] if op_rows else (request.session.get("user_nombre") or "")
+    else:
+        operador = request.session.get("user_nombre") or ""
 
     html = _build_html(titulo, r, mov, entrega, recepcion, pago_rows, operador)
     return HTMLResponse(html)
