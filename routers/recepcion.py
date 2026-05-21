@@ -39,10 +39,16 @@ async def ver(request: Request, id_reserva: int):
                Km, [Km adicional] AS KmAdicional, [Monedas.Descripcion] AS Moneda
         FROM dbo.vw_AppSheet_Reservas WHERE IdReserva = ?
     """, [id_reserva])
-    km_salida      = int(res[0]["KmSalida"] or 0)      if res else 0
-    nafta_salida   = res[0]["NaftaSalida"]              if res else None
-    km_disponible  = int(res[0]["Km"] or 0)            if res else 0
-    km_adicional   = float(res[0]["KmAdicional"] or 0) if res else 0
+    def _int(v):
+        try: return int(v or 0)
+        except (ValueError, TypeError): return 0
+    def _float(v):
+        try: return float(v or 0)
+        except (ValueError, TypeError): return 0.0
+    km_salida      = _int(res[0]["KmSalida"])      if res else 0
+    nafta_salida   = res[0]["NaftaSalida"]          if res else None
+    km_disponible  = _int(res[0]["Km"])             if res else 0
+    km_adicional   = _float(res[0]["KmAdicional"])  if res else 0.0
     moneda         = (res[0]["Moneda"] or "Pesos")     if res else "Pesos"
 
     nombre_op = request.session.get("user_nombre", "")
