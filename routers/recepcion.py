@@ -49,6 +49,7 @@ async def ver(request: Request, id_reserva: int):
         except (ValueError, TypeError): return 0.0
     km_salida      = _int(res[0]["KmSalida"])      if res else 0
     nafta_salida   = res[0]["NaftaSalida"]          if res else None
+    km_libre       = str(res[0]["Km"] or "").upper() == "LIBRES" if res else False
     km_disponible  = _int(res[0]["Km"])             if res else 0
     km_adicional   = _float(res[0]["KmAdicional"])  if res else 0.0
     moneda         = (res[0]["Moneda"] or "Pesos")     if res else "Pesos"
@@ -73,6 +74,7 @@ async def ver(request: Request, id_reserva: int):
         "km_disponible": km_disponible,
         "km_adicional":  km_adicional,
         "moneda":        moneda,
+        "km_libre":      km_libre,
         "es_taller":     es_taller,
         "ok":            request.query_params.get("ok"),
     })
