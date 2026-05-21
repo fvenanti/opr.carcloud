@@ -40,8 +40,8 @@ def execute_scalar(sql: str, params=None):
     try:
         cur = conn.cursor()
         cur.execute(sql, params or [])
-        conn.commit()
         row = cur.fetchone()
+        conn.commit()
         return row[0] if row else None
     finally:
         conn.close()
