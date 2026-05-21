@@ -52,7 +52,7 @@
       {% endif %}
     </div>
 
-    <button type="submit" :disabled="enviando"
+    <button type="submit" data-no-spin :disabled="enviando"
             :class="enviando ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 active:bg-blue-700'"
             class="w-full text-white font-semibold rounded-2xl py-4 text-base
                    transition-colors flex items-center justify-center gap-2">
