@@ -1,9 +1,12 @@
+import os
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from database import query
 from shared_templates import templates
 from utils import hoy_arg
 from datetime import datetime, date
+
+UPLOAD_DIR = os.environ.get("UPLOAD_DIR", "/app/uploads")
 
 router = APIRouter()
 
@@ -27,15 +30,22 @@ SELECT
 FROM dbo.vw_AppSheet_Vehiculos v
 OUTER APPLY (
     SELECT TOP 1
-        IdReserva,
-        [Sucursales.Sucursal],
-        Apellido,
-        Nombre
-    FROM dbo.vw_AppSheet_Reservas
-    WHERE MATRICULA = v.MATRICULA
-      AND [Status_Reserva.Descripcion] NOT IN {_CANCELADAS}
-      AND CAST(? AS DATE)
-          BETWEEN CAST([Fecha Salida] AS DATE) AND CAST([Fecha Entrada] AS DATE)
+        r.IdReserva,
+        r.[Sucursales.Sucursal],
+        r.Apellido,
+        r.Nombre,
+        r.[Status_Reserva.Descripcion]                          AS EstadoReserva,
+        CASE WHEN m.IdReserva IS NOT NULL THEN 1 ELSE 0 END     AS TieneMailEnviado
+    FROM dbo.vw_AppSheet_Reservas r
+    LEFT JOIN opr.mails_enviados m ON m.IdReserva = r.IdReserva
+    WHERE r.MATRICULA = v.MATRICULA
+      AND r.[Status_Reserva.Descripcion] NOT IN {_CANCELADAS}
+      AND CAST(r.[Fecha Salida] AS DATE) >= DATEADD(day, -90, CAST(? AS DATE))
+      AND (
+          m.IdReserva IS NOT NULL
+          OR r.[Status_Reserva.Descripcion] IN ('Efectiva', 'Finalizada', 'Finalizado')
+      )
+    ORDER BY r.[Fecha Salida] DESC
 ) r
 OUTER APPLY (
     SELECT TOP 1
@@ -51,6 +61,11 @@ ORDER BY v.Sucursal,
          ISNULL(CAST(nr.ProximaSalida AS NVARCHAR(20)), '9999-12-31'),
          v.MATRICULA
 """
+
+
+def _flag_finalizado(id_reserva: int) -> bool:
+    path = os.path.join(UPLOAD_DIR, str(id_reserva), "finalizado.flag")
+    return os.path.isfile(path)
 
 
 def _fmt_fecha(val) -> str:
@@ -110,7 +125,11 @@ def _agrupar(vehiculos: list[dict]) -> tuple[list, list, list]:
     for v in vehiculos:
         v['ProximaSalidaFmt'] = _fmt_fecha(v.get('ProximaSalida'))
         v['ProximoHorarioFmt'] = str(v.get('ProximoHorario') or '')[:5]
-        if v.get("IdReserva") is not None:
+        estado = (v.get("EstadoReserva") or "").lower()
+        id_res = v.get("IdReserva")
+        red   = v.get("TieneMailEnviado") or estado in ("efectiva", "finalizada", "finalizado")
+        green = estado in ("finalizada", "finalizado") or (id_res and _flag_finalizado(id_res))
+        if red and not green:
             if "taller" in (v.get("SucursalReserva") or "").lower():
                 taller.append(v)
             else:
@@ -124,7 +143,7 @@ def _agrupar(vehiculos: list[dict]) -> tuple[list, list, list]:
 @router.get("/", response_class=HTMLResponse)
 async def lista(request: Request):
     hoy = hoy_arg()
-    vehiculos = query(_SQL_TODOS, [hoy.isoformat(), hoy.isoformat()])
+    vehiculos = query(_SQL_TODOS, [hoy.isoformat(), hoy.isoformat(), hoy.isoformat()])
     alquilados, taller, disponibles = _agrupar(vehiculos)
 
     patentes = [v['MATRICULA'] for v in disponibles if v.get('MATRICULA')]
