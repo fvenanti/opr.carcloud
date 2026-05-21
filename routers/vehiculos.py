@@ -23,7 +23,8 @@ SELECT
     v.UBICACION          AS Ubicacion,
     v.Categoría          AS Categoria,
     r.IdReserva,
-    r.[Sucursales.Sucursal]  AS SucursalReserva,
+    r.[Sucursales.Sucursal]    AS SucursalReserva,
+    r.[Sucursales_1.Sucursal]  AS SucursalReservaEntrada,
     ISNULL(r.Apellido,'') + CASE WHEN r.Nombre IS NOT NULL THEN ', ' + r.Nombre ELSE '' END AS Cliente,
     r.EstadoReserva,
     r.TieneMailEnviado,
@@ -34,6 +35,7 @@ OUTER APPLY (
     SELECT TOP 1
         r.IdReserva,
         r.[Sucursales.Sucursal],
+        r.[Sucursales_1.Sucursal],
         r.Apellido,
         r.Nombre,
         r.[Status_Reserva.Descripcion]                          AS EstadoReserva,
@@ -132,7 +134,9 @@ def _agrupar(vehiculos: list[dict]) -> tuple[list, list, list]:
         red   = v.get("TieneMailEnviado") or estado in ("efectiva", "finalizada", "finalizado")
         green = estado in ("finalizada", "finalizado") or (id_res and _flag_finalizado(id_res))
         if red and not green:
-            if "taller" in (v.get("SucursalReserva") or "").lower():
+            suc_sal = (v.get("SucursalReserva") or "").lower()
+            suc_ent = (v.get("SucursalReservaEntrada") or "").lower()
+            if "taller" in suc_sal or "taller" in suc_ent:
                 taller.append(v)
             else:
                 alquilados.append(v)
