@@ -143,7 +143,7 @@ def _agrupar(vehiculos: list[dict]) -> tuple[list, list, list]:
 @router.get("/", response_class=HTMLResponse)
 async def lista(request: Request):
     hoy = hoy_arg()
-    vehiculos = query(_SQL_TODOS, [hoy.isoformat(), hoy.isoformat(), hoy.isoformat()])
+    vehiculos = query(_SQL_TODOS, [hoy.isoformat(), hoy.isoformat()])
     alquilados, taller, disponibles = _agrupar(vehiculos)
 
     patentes = [v['MATRICULA'] for v in disponibles if v.get('MATRICULA')]
