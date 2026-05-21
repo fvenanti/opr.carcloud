@@ -44,7 +44,10 @@ OUTER APPLY (
     LEFT JOIN opr.mails_enviados m ON m.IdReserva = r.IdReserva
     WHERE r.MATRICULA = v.MATRICULA
       AND r.[Status_Reserva.Descripcion] NOT IN {_CANCELADAS}
-      AND CAST(r.[Fecha Salida] AS DATE) >= DATEADD(day, -90, CAST(? AS DATE))
+      AND (
+          CAST(r.[Fecha Salida] AS DATE) >= DATEADD(day, -90, CAST(? AS DATE))
+          OR CAST(r.[Fecha Entrada] AS DATE) >= CAST(? AS DATE)
+      )
       AND (
           m.IdReserva IS NOT NULL
           OR r.[Status_Reserva.Descripcion] IN ('Efectiva', 'Finalizada', 'Finalizado')
@@ -149,7 +152,7 @@ def _agrupar(vehiculos: list[dict]) -> tuple[list, list, list]:
 @router.get("/", response_class=HTMLResponse)
 async def lista(request: Request):
     hoy = hoy_arg()
-    vehiculos = query(_SQL_TODOS, [hoy.isoformat(), hoy.isoformat()])
+    vehiculos = query(_SQL_TODOS, [hoy.isoformat(), hoy.isoformat(), hoy.isoformat()])
     alquilados, taller, disponibles = _agrupar(vehiculos)
 
     patentes = [v['MATRICULA'] for v in disponibles if v.get('MATRICULA')]
