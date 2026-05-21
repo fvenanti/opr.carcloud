@@ -23,10 +23,15 @@
     #loadbar { position:fixed; top:0; left:0; width:100%; height:3px; z-index:9999; pointer-events:none; }
     #loadbar-inner { height:100%; width:0; background:#16a34a; transition:width 0.2s ease; display:none; }
     ._tap { opacity:0.45 !important; transform:scale(0.93) !important; transition:transform 0.05s,opacity 0.05s !important; }
+    #ptr { position:fixed; top:56px; left:0; right:0; display:flex; justify-content:center; align-items:center; height:44px; z-index:35; pointer-events:none; transform:translateY(-44px); transition:transform 0.15s; }
+    #ptr-icon { width:22px; height:22px; border:2.5px solid #16a34a; border-top-color:transparent; border-radius:50%; transition:border-color 0.15s; }
+    #ptr-icon.ready { animation:ptr-spin 0.6s linear infinite; }
+    @keyframes ptr-spin { to { transform:rotate(360deg); } }
   </style>
 </head>
 <body class="bg-gray-50 font-sans antialiased flex flex-col overflow-hidden" style="height:100vh;height:100dvh;">
   <div id="loadbar"><div id="loadbar-inner"></div></div>
+  <div id="ptr"><div id="ptr-icon"></div></div>
 
   {# ── Header ──────────────────────────────────────────────────────────────── #}
   <header class="shrink-0 z-40 bg-white border-b border-gray-100 h-14 flex items-center px-3 shadow-sm">
@@ -131,6 +136,41 @@
         if (btn && !btn.disabled) { btn.disabled = true; btn.style.opacity = '0.65'; }
       });
       window.addEventListener('pageshow', done);
+    })();
+  </script>
+  <script>
+    (function(){
+      var main = document.querySelector('main');
+      var ptr  = document.getElementById('ptr');
+      var icon = document.getElementById('ptr-icon');
+      var THRESHOLD = 72, startY = 0, pulling = false, triggered = false;
+      main.addEventListener('touchstart', function(e){
+        if (main.scrollTop > 0) return;
+        startY = e.touches[0].clientY;
+        pulling = true; triggered = false;
+        ptr.style.transition = 'none';
+      }, {passive:true});
+      main.addEventListener('touchmove', function(e){
+        if (!pulling || main.scrollTop > 0) return;
+        var dy = Math.max(0, e.touches[0].clientY - startY);
+        var pull = Math.min(dy * 0.45, THRESHOLD * 0.8);
+        ptr.style.transform = 'translateY(' + (pull - 44) + 'px)';
+        icon.classList.toggle('ready', dy >= THRESHOLD);
+      }, {passive:true});
+      main.addEventListener('touchend', function(e){
+        if (!pulling) return;
+        pulling = false;
+        ptr.style.transition = 'transform 0.15s';
+        var dy = e.changedTouches[0].clientY - startY;
+        if (dy >= THRESHOLD && !triggered) {
+          triggered = true;
+          ptr.style.transform = 'translateY(0)';
+          setTimeout(function(){ location.reload(); }, 150);
+        } else {
+          ptr.style.transform = 'translateY(-44px)';
+          icon.classList.remove('ready');
+        }
+      }, {passive:true});
     })();
   </script>
   {% block scripts %}{% endblock %}
