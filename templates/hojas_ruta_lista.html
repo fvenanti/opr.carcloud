@@ -40,7 +40,21 @@
       {% endif %}
     </div>
     <div class="flex items-center gap-3">
-      <span class="{% if es_hoy %}bg-primary-500 text-white{% else %}bg-gray-100 text-gray-700{% endif %} text-sm font-semibold rounded-full px-2.5 py-0.5 min-w-[2rem] text-center">
+      {% set proc = fila.procesados %}
+      {% if proc is not none %}
+        {% if proc == fila.cantidad %}
+          {% set badge = "bg-green-500 text-white" %}
+        {% elif proc > 0 %}
+          {% set badge = "bg-amber-400 text-white" %}
+        {% else %}
+          {% set badge = "bg-gray-200 text-gray-500" %}
+        {% endif %}
+      {% elif es_hoy %}
+        {% set badge = "bg-primary-500 text-white" %}
+      {% else %}
+        {% set badge = "bg-gray-100 text-gray-700" %}
+      {% endif %}
+      <span class="{{ badge }} text-sm font-semibold rounded-full px-2.5 py-0.5 min-w-[2rem] text-center">
         {{ fila.cantidad }}
       </span>
       <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

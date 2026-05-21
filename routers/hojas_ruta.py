@@ -1,4 +1,5 @@
 import os
+from collections import defaultdict
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from database import query
@@ -26,6 +27,26 @@ FROM (
 ) t
 GROUP BY fecha
 ORDER BY fecha
+"""
+
+_SQL_MOV_RANGO = f"""
+SELECT
+    IdReserva,
+    [Status_Reserva.Descripcion] AS EstadoReserva,
+    'OUT'                         AS TipoMovimiento,
+    CAST([Fecha Salida] AS DATE)  AS FechaMovimiento
+FROM dbo.vw_AppSheet_Reservas
+WHERE CAST([Fecha Salida] AS DATE) BETWEEN ? AND ?
+  AND [Status_Reserva.Descripcion] NOT IN {_CANCELADAS}
+UNION ALL
+SELECT
+    IdReserva,
+    [Status_Reserva.Descripcion],
+    'IN',
+    CAST([Fecha Entrada] AS DATE)
+FROM dbo.vw_AppSheet_Reservas
+WHERE CAST([Fecha Entrada] AS DATE) BETWEEN ? AND ?
+  AND [Status_Reserva.Descripcion] NOT IN {_CANCELADAS}
 """
 
 _SQL_DIA = f"""
@@ -73,6 +94,10 @@ def _agrupar_por_sucursal(movimientos: list[dict]) -> dict:
     return grupos
 
 
+def _to_date(v):
+    return v.date() if hasattr(v, "date") else v
+
+
 @router.get("/", response_class=HTMLResponse)
 async def lista(request: Request):
     hoy = hoy_arg()
@@ -80,6 +105,39 @@ async def lista(request: Request):
     hasta = hoy + timedelta(days=15)
     fechas = query(_SQL_FECHAS, [desde.isoformat(), hasta.isoformat(),
                                  desde.isoformat(), hasta.isoformat()])
+
+    # Calcular procesados por día para el rango pasado + hoy
+    mov = query(_SQL_MOV_RANGO, [desde.isoformat(), hoy.isoformat(),
+                                  desde.isoformat(), hoy.isoformat()])
+
+    _estados_out = {"efectiva", "finalizada", "finalizado"}
+    _estados_in  = {"finalizada", "finalizado"}
+    ids_out = [m["IdReserva"] for m in mov if m["TipoMovimiento"] == "OUT"]
+    ids_in  = [m["IdReserva"] for m in mov if m["TipoMovimiento"] == "IN"]
+    proc_set = set()
+
+    if ids_out:
+        ph = ",".join("?" * len(ids_out))
+        rows = query(f"SELECT IdReserva FROM opr.mails_enviados WHERE IdReserva IN ({ph})", ids_out)
+        proc_set |= {r["IdReserva"] for r in rows}
+        proc_set |= {m["IdReserva"] for m in mov
+                     if m["TipoMovimiento"] == "OUT"
+                     and (m.get("EstadoReserva") or "").strip().lower() in _estados_out}
+    if ids_in:
+        proc_set |= {id_r for id_r in ids_in if os.path.isfile(flag_path(id_r))}
+        proc_set |= {m["IdReserva"] for m in mov
+                     if m["TipoMovimiento"] == "IN"
+                     and (m.get("EstadoReserva") or "").strip().lower() in _estados_in}
+
+    dia_proc = defaultdict(int)
+    for m in mov:
+        if m["IdReserva"] in proc_set:
+            dia_proc[_to_date(m["FechaMovimiento"])] += 1
+
+    for fila in fechas:
+        fd = _to_date(fila["fecha"])
+        fila["procesados"] = dia_proc[fd] if fd <= hoy else None
+
     return templates.TemplateResponse("hojas_ruta_lista.html", {
         "request":    request,
         "fechas":     fechas,
