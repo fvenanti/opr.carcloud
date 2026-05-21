@@ -220,7 +220,7 @@
   {% if reserva.NombreCliente %}
   <div class="flex items-center px-4 py-2.5 border-b border-gray-100">
     <span class="w-32 shrink-0 text-xs text-gray-400 uppercase tracking-wide">Cliente</span>
-    <a href="/clientes?q={{ reserva.NombreCliente | urlencode }}"
+    <a href="/clientes?id_cliente={{ reserva.IdCliente }}"
        class="text-sm font-medium text-blue-600 underline underline-offset-2">
       {{ reserva.NombreCliente }}
     </a>

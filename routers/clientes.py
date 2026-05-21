@@ -52,10 +52,25 @@ ORDER BY c.Apellido, c.Nombre
 """
 
 
+_SQL_POR_ID = """
+SELECT
+    c.IdCliente,
+    c.DNI,
+    c.Apellido,
+    c.Nombre,
+    c.Mail,
+    c.[Teléfono]               AS Telefono,
+    c.[Licencia de Conducir Nro] AS Licencia
+FROM dbo.vw_AppSheet_Clientes c
+WHERE c.IdCliente = ?
+"""
+
 @router.get("/", response_class=HTMLResponse)
-async def lista(request: Request, q: str = ""):
+async def lista(request: Request, q: str = "", id_cliente: int = 0):
     desde, hasta = rango_hojas_ruta()
-    if q.strip():
+    if id_cliente:
+        clientes = query(_SQL_POR_ID, [id_cliente])
+    elif q.strip():
         patron = f"%{q.strip()}%"
         clientes = query(_SQL_BUSCAR, [desde, hasta, desde, hasta, patron, patron, patron])
     else:
