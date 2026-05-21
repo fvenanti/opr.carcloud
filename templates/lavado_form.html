@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Nuevo Lavado{% endblock %}
+{% block main_class %}pb-6{% endblock %}
+{% block bottom_nav %}{% endblock %}
+
+{% block header_left %}
+  <a href="/vehiculos/" class="p-2 -ml-1 text-gray-600">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+    </svg>
+  </a>
+{% endblock %}
+{% block header_title %}NUEVO LAVADO{% endblock %}
+
+{% block content %}
+<form method="post" action="/lavados/nuevo/{{ patente }}" class="px-4 pt-4 space-y-4">
+
+  <div class="bg-white border border-gray-100 rounded-2xl px-4 py-3">
+    <p class="text-xs text-gray-400 uppercase tracking-wide mb-0.5">Vehículo</p>
+    <p class="text-xl font-black text-gray-900 tracking-wide">{{ patente }}</p>
+    {% if veh.Marca or veh.Modelo %}
+    <p class="text-sm text-gray-500">{{ [veh.Marca, veh.Modelo] | select | join(' ') }}</p>
+    {% endif %}
+  </div>
+
+  <div>
+    <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">Tipo de Lavado</label>
+    <div class="grid grid-cols-3 gap-2" x-data="{ tipo: 'Clásico' }">
+      {% for t in tipos %}
+      <button type="button" @click="tipo='{{ t }}'"
+              :class="tipo==='{{ t }}' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-200'"
+              class="border rounded-xl py-3 font-semibold text-sm transition-colors">{{ t }}</button>
+      {% endfor %}
+      <input type="hidden" name="tipo_lavado" x-bind:value="tipo">
+    </div>
+  </div>
+
+  <div>
+    <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">Origen</label>
+    <select name="origen" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 bg-white focus:outline-none focus:border-blue-500">
+      {% for o in origenes %}
+      <option value="{{ o }}">{{ o }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <button type="submit"
+          class="w-full bg-blue-600 text-white font-semibold rounded-2xl py-4 text-base active:bg-blue-700 transition-colors">
+    Crear Lavado
+  </button>
+</form>
+{% endblock %}

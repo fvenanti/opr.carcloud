@@ -2,31 +2,34 @@
 {% block title %}Vehículos{% endblock %}
 {% block header_title %}VEHÍCULOS{% endblock %}
 
+{% block header_right %}
+  <a href="/lavados/" class="relative p-2 -mr-1 text-gray-600">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+    </svg>
+  </a>
+{% endblock %}
+
 {% block content %}
 <div x-data="{ q: '' }">
 
   <!-- Buscador -->
-  <div class="px-4 py-3 bg-white border-b border-gray-100 sticky top-14 z-30">
+  <div class="px-4 py-3 bg-white border-b border-gray-100 sticky top-0 z-30">
     <div class="relative">
       <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
       </svg>
       <input type="search" x-model="q" placeholder="Patente, marca o modelo…"
-             class="w-full pl-9 pr-4 py-2 bg-gray-100 rounded-xl text-sm text-gray-900 placeholder-gray-400
-                    focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition-colors">
+             class="w-full pl-9 pr-4 py-2 bg-gray-100 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition-colors">
     </div>
   </div>
 
-  {% macro fila(v, con_link) %}
+  {# ── Macro fila alquilados/taller (con link) ── #}
+  {% macro fila_link(v) %}
   {% set match_str = (v.MATRICULA or '') ~ ' ' ~ (v.Marca or '') ~ ' ' ~ (v.Modelo or '') %}
-  {% if con_link %}
   <a href="/planilla/{{ v.IdReserva }}"
      class="flex items-center px-4 py-3 gap-3 active:bg-gray-50 transition-colors"
      x-show="!q || '{{ match_str }}'.toLowerCase().includes(q.toLowerCase())" x-cloak>
-  {% else %}
-  <div class="flex items-center px-4 py-3 gap-3"
-       x-show="!q || '{{ match_str }}'.toLowerCase().includes(q.toLowerCase())" x-cloak>
-  {% endif %}
     <div class="flex-1 min-w-0">
       <p class="font-semibold text-gray-900 text-sm">{{ v.MATRICULA or '' }}</p>
       <p class="text-xs text-gray-500 truncate">
@@ -36,20 +39,57 @@
       <p class="text-xs text-blue-600 truncate mt-0.5">{{ v.Cliente }}</p>
       {% endif %}
     </div>
-    <div class="flex-shrink-0 text-right">
-      {% if v.Combustible %}
-      <p class="text-xs text-gray-400">{{ v.Combustible }}</p>
-      {% endif %}
-      {% if con_link %}
+    <div class="shrink-0 text-right">
+      {% if v.Combustible %}<p class="text-xs text-gray-400">{{ v.Combustible }}</p>{% endif %}
       <svg class="w-4 h-4 text-gray-300 ml-auto mt-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
       </svg>
-      {% endif %}
     </div>
-  {% if con_link %}</a>{% else %}</div>{% endif %}
+  </a>
   {% endmacro %}
 
-  {% macro grupo(titulo, lista, dot_class, con_link) %}
+  {# ── Macro fila disponibles (con estado lavado y lavar button) ── #}
+  {% macro fila_disp(v) %}
+  {% set match_str = (v.MATRICULA or '') ~ ' ' ~ (v.Marca or '') ~ ' ' ~ (v.Modelo or '') %}
+  <div class="flex items-center px-4 py-3 gap-3"
+       x-show="!q || '{{ match_str }}'.toLowerCase().includes(q.toLowerCase())" x-cloak>
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-2 flex-wrap">
+        <p class="font-semibold text-gray-900 text-sm">{{ v.MATRICULA or '' }}</p>
+        {# Badge Limpio/Sucio/En lavado #}
+        {% if v.LavadoEstado == 'Limpio' %}
+        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-700">Limpio</span>
+        {% elif v.LavadoEstado == 'En lavado' %}
+        <a href="/lavados/{{ v.LavadoIdActivo }}" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">En lavado ›</a>
+        {% else %}
+        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-600">Sucio</span>
+        {% endif %}
+      </div>
+      <p class="text-xs text-gray-500 truncate">
+        {{ [v.Marca, v.Modelo] | select | join(' ') }}{% if v.Categoria %} · {{ v.Categoria }}{% endif %}
+      </p>
+      {% if v.ProximaSalidaFmt %}
+      <p class="text-xs text-orange-600 font-medium mt-0.5">
+        Próx. salida: {{ v.ProximaSalidaFmt }}{% if v.ProximoHorarioFmt %} {{ v.ProximoHorarioFmt }}{% endif %}
+      </p>
+      {% else %}
+      <p class="text-xs text-gray-400 mt-0.5">Sin reservas próximas</p>
+      {% endif %}
+    </div>
+    <div class="shrink-0 flex items-center gap-2">
+      {% if v.Combustible %}<p class="text-xs text-gray-400">{{ v.Combustible }}</p>{% endif %}
+      {% if v.LavadoEstado != 'En lavado' %}
+      <a href="/lavados/nuevo/{{ v.MATRICULA }}"
+         class="text-xs font-semibold px-3 py-1.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-xl active:bg-blue-100 whitespace-nowrap">
+        Lavar
+      </a>
+      {% endif %}
+    </div>
+  </div>
+  {% endmacro %}
+
+  {# ── Macro grupo ── #}
+  {% macro grupo(titulo, lista, dot_class, tipo) %}
   {% if lista %}
   <div class="mt-2">
     <div class="px-4 py-2 flex items-center gap-2">
@@ -59,16 +99,17 @@
     </div>
     <div class="divide-y divide-gray-100 bg-white border-y border-gray-100">
       {% for v in lista %}
-        {{ fila(v, con_link) }}
+        {% if tipo == 'disp' %}{{ fila_disp(v) }}
+        {% else %}{{ fila_link(v) }}{% endif %}
       {% endfor %}
     </div>
   </div>
   {% endif %}
   {% endmacro %}
 
-  {{ grupo('Alquilados', alquilados, 'bg-blue-500', true) }}
-  {{ grupo('Taller',     taller,     'bg-orange-400', true) }}
-  {{ grupo('Disponibles',disponibles,'bg-green-500', false) }}
+  {{ grupo('Alquilados', alquilados, 'bg-blue-500',    'link') }}
+  {{ grupo('Taller',     taller,     'bg-orange-400',  'link') }}
+  {{ grupo('Disponibles',disponibles,'bg-green-500',   'disp') }}
 
   {% if not alquilados and not taller and not disponibles %}
   <div class="flex flex-col items-center justify-center py-20 text-gray-400">

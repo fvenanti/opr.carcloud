@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Lavados Pendientes{% endblock %}
+{% block main_class %}pb-6{% endblock %}
+{% block bottom_nav %}{% endblock %}
+
+{% block header_left %}
+  <a href="/vehiculos/" class="p-2 -ml-1 text-gray-600">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+    </svg>
+  </a>
+{% endblock %}
+{% block header_title %}LAVADOS PENDIENTES{% endblock %}
+
+{% block content %}
+{% if pendientes %}
+<div class="mt-3 divide-y divide-gray-100 bg-white border-y border-gray-100">
+  {% for l in pendientes %}
+  <a href="/lavados/{{ l.Id }}"
+     class="flex items-center px-4 py-3 gap-3 active:bg-gray-50 transition-colors">
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-2 flex-wrap">
+        <p class="font-semibold text-gray-900 text-sm">{{ l.Patente or '—' }}</p>
+        {% if l.Estado == 'En proceso' %}
+        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">En proceso</span>
+        {% else %}
+        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Pendiente</span>
+        {% endif %}
+      </div>
+      <p class="text-xs text-gray-500 truncate">
+        {{ l.TipoLavado }}{% if l.Marca or l.Modelo %} · {{ [l.Marca, l.Modelo] | select | join(' ') }}{% endif %}
+      </p>
+      {% if l.FechaHoraInicio %}
+      <p class="text-xs text-blue-600 mt-0.5">Iniciado: {{ l.FechaHoraInicio }}</p>
+      {% endif %}
+    </div>
+    <svg class="w-4 h-4 text-gray-300 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+    </svg>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="flex flex-col items-center justify-center py-20 text-gray-400">
+  <p class="text-sm">Sin lavados pendientes</p>
+</div>
+{% endif %}
+{% endblock %}
