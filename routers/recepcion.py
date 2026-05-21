@@ -36,7 +36,9 @@ async def ver(request: Request, id_reserva: int):
 
     res = query("""
         SELECT [Km Salida] AS KmSalida, [Nafta Salida] AS NaftaSalida,
-               Km, [Km adicional] AS KmAdicional, [Monedas.Descripcion] AS Moneda
+               Km, [Km adicional] AS KmAdicional, [Monedas.Descripcion] AS Moneda,
+               [Sucursales.Sucursal] AS SucursalSalida,
+               [Sucursales_1.Sucursal] AS SucursalEntrada
         FROM dbo.vw_AppSheet_Reservas WHERE IdReserva = ?
     """, [id_reserva])
     def _int(v):
@@ -50,6 +52,11 @@ async def ver(request: Request, id_reserva: int):
     km_disponible  = _int(res[0]["Km"])             if res else 0
     km_adicional   = _float(res[0]["KmAdicional"])  if res else 0.0
     moneda         = (res[0]["Moneda"] or "Pesos")     if res else "Pesos"
+    es_taller      = False
+    if res:
+        ss = (res[0].get("SucursalSalida")  or "").lower()
+        se = (res[0].get("SucursalEntrada") or "").lower()
+        es_taller = "taller" in ss or "taller" in se
 
     nombre_op = request.session.get("user_nombre", "")
     return templates.TemplateResponse("recepcion.html", {
@@ -62,6 +69,7 @@ async def ver(request: Request, id_reserva: int):
         "km_disponible": km_disponible,
         "km_adicional":  km_adicional,
         "moneda":        moneda,
+        "es_taller":     es_taller,
         "ok":            request.query_params.get("ok"),
     })
 

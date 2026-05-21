@@ -88,17 +88,20 @@
              class="w-full border rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-green-500">
     </div>
 
-    <div class="grid grid-cols-2 gap-3">
+    <div class="grid {% if es_taller %}grid-cols-1{% else %}grid-cols-2{% endif %} gap-3">
       <div class="bg-gray-50 rounded-xl px-4 py-3">
         <p class="text-xs text-gray-400 uppercase tracking-wide mb-0.5">Diferencia Km</p>
         <p class="text-lg font-bold text-gray-900" x-text="fmt(dif)">—</p>
       </div>
+      {% if not es_taller %}
       <div :class="exced > 0 ? 'bg-red-50' : 'bg-gray-50'" class="rounded-xl px-4 py-3">
         <p class="text-xs text-gray-400 uppercase tracking-wide mb-0.5">Km excedentes</p>
         <p class="text-lg font-bold" :class="exced > 0 ? 'text-red-600' : 'text-gray-900'" x-text="fmt(exced)">—</p>
       </div>
+      {% endif %}
     </div>
 
+    {% if not es_taller %}
     <div x-show="exced > 0" :class="exced > 0 ? 'bg-red-50 border-red-200' : 'bg-gray-50 border-gray-100'"
          class="border rounded-xl px-4 py-3">
       <p class="text-xs text-gray-400 uppercase tracking-wide mb-0.5">Monto excedente</p>
@@ -109,6 +112,7 @@
         <span x-text="fmt(exced)"></span> km × <span x-text="fmt(km_adic)"></span>
       </p>
     </div>
+    {% endif %}
 
   </div>
 
