@@ -81,11 +81,11 @@ def _get_lavado_status(patentes: list[str]) -> dict:
     lav_map = {(r['Patente'] or '').upper(): r for r in lavado_rows}
 
     rec_rows = query("""
-        SELECT a.MATRICULA, MAX(r.FechaCreacion) AS UltimaRecepcion
+        SELECT res.MATRICULA, MAX(r.FechaCreacion) AS UltimaRecepcion
         FROM recepciones r
-        JOIN dbo.alquileres a ON a.IdReserva = r.IdReserva
-        WHERE a.MATRICULA IS NOT NULL
-        GROUP BY a.MATRICULA
+        JOIN dbo.vw_AppSheet_Reservas res ON res.IdReserva = r.IdReserva
+        WHERE res.MATRICULA IS NOT NULL
+        GROUP BY res.MATRICULA
     """)
     rec_map = {r['MATRICULA'].upper(): r['UltimaRecepcion'] for r in rec_rows}
 
