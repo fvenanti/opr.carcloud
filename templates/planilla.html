@@ -19,7 +19,7 @@
 </div>
 
 <!-- Botones de acción -->
-<div class="px-4 py-3 grid grid-cols-3 gap-3">
+<div class="px-4 py-3 {% if es_taller %}flex flex-col{% else %}grid grid-cols-3{% endif %} gap-3">
 
   {% macro accion_btn(href, icono, label, done, blue=false, rojo=false, extra='') %}
   <a href="{{ href }}"
@@ -55,6 +55,9 @@
   {% set icon_firma      = '<svg class="w-6 h-6 ' ~ ('text-blue-600' if contrato_listo else ('text-green-600' if tiene_firma      else 'text-white')) ~ '" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>' %}
 
   {% if mostrar_out %}
+    {% if es_taller %}
+  {{ accion_btn('/planilla/' ~ reserva.IdReserva ~ '/entregas', icon_entrega, 'DATOS DEL VEHÍCULO A LA ENTREGA', tiene_entrega) }}
+    {% else %}
   {{ accion_btn('/planilla/' ~ reserva.IdReserva ~ '/conductor',   icon_conductor,   'DATOS DE CONDUCTOR PRINCIPAL',    tiene_conductor,   contrato_listo) }}
   {{ accion_btn('/planilla/' ~ reserva.IdReserva ~ '/adicionales', icon_adicionales, 'DATOS DE LA RESERVA',            tiene_adicionales, contrato_listo) }}
   {{ accion_btn('/planilla/' ~ reserva.IdReserva ~ '/pagos',
@@ -62,7 +65,14 @@
     'AGREGAR PAGOS', pago_pagado, rojo=pago_debe, extra='DEBE' if pago_debe else '') }}
   {{ accion_btn('/planilla/' ~ reserva.IdReserva ~ '/entregas', icon_entrega, 'DATOS DEL VEHÍCULO A LA ENTREGA', tiene_entrega, contrato_listo) }}
   {{ accion_btn('/planilla/' ~ reserva.IdReserva ~ '/firmas',   icon_firma,   'FIRMA DE CONTRATO',               tiene_firma,   contrato_listo) }}
+    {% endif %}
   {% elif mostrar_in %}
+    {% if es_taller %}
+  {{ accion_btn(
+    '/planilla/' ~ reserva.IdReserva ~ '/recepcion',
+    '<svg class="w-6 h-6 ' ~ ('text-green-600' if tiene_recepcion else 'text-white') ~ '" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>',
+    'RECEPCIÓN DEL VEHÍCULO', tiene_recepcion) }}
+    {% else %}
   {{ accion_btn('/planilla/' ~ reserva.IdReserva ~ '/pagos',
     '<svg class="w-6 h-6 ' ~ _pago_icon_color ~ '" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
     'AGREGAR PAGOS', pago_pagado, rojo=pago_debe, extra='DEBE' if pago_debe else '') }}
@@ -70,6 +80,7 @@
     '/planilla/' ~ reserva.IdReserva ~ '/recepcion',
     '<svg class="w-6 h-6 ' ~ ('text-green-600' if tiene_recepcion else 'text-white') ~ '" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>',
     'RECEPCIÓN DEL VEHÍCULO', tiene_recepcion) }}
+    {% endif %}
   {% endif %}
 
 </div>
@@ -150,7 +161,22 @@
 </div>
 {% endif %}
 
-{% if mostrar_out and contrato_listo %}
+{% if mostrar_out and es_taller and taller_listo %}
+<div class="px-4 pb-4" x-data="{ loading: false }">
+  <a href="/planilla/{{ reserva.IdReserva }}/enviar-taller"
+     @click="loading = true"
+     :class="loading && 'pointer-events-none opacity-75'"
+     class="flex items-center justify-center gap-2 w-full bg-orange-500 text-white font-semibold rounded-2xl py-4 text-base active:bg-orange-600 transition-colors">
+    <svg x-show="!loading" class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+    </svg>
+    <svg x-show="loading" class="w-5 h-5 shrink-0 animate-spin" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+    </svg>
+    <span x-text="loading ? 'Enviando...' : 'Enviar a Taller'"></span>
+  </a>
+</div>
+{% elif mostrar_out and not es_taller and contrato_listo %}
 <div class="px-4 pb-2">
   <a href="/planilla/{{ reserva.IdReserva }}/enviar-contrato"
      class="relative flex items-center justify-center gap-2 w-full bg-blue-600 text-white font-semibold rounded-2xl py-4 text-base active:bg-blue-700 transition-colors">
@@ -166,7 +192,7 @@
   </a>
 </div>
 <div class="px-4 pb-4">
-  <a href="/planilla/{{ reserva.IdReserva }}/comanda?tipo=OUT"     class="flex items-center justify-center gap-2 w-full bg-gray-700 text-white font-semibold rounded-2xl py-4 text-base active:bg-gray-800 transition-colors">
+  <a href="/planilla/{{ reserva.IdReserva }}/comanda?tipo=OUT" class="flex items-center justify-center gap-2 w-full bg-gray-700 text-white font-semibold rounded-2xl py-4 text-base active:bg-gray-800 transition-colors">
     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
     </svg>
@@ -175,7 +201,23 @@
 </div>
 {% endif %}
 
-{% if mostrar_in and tiene_recepcion %}
+{% if mostrar_in and es_taller and tiene_recepcion %}
+<div class="px-4 pb-4" x-data="{ loading: false }">
+  <a href="/planilla/{{ reserva.IdReserva }}/finalizar-taller"
+     @click="loading = true"
+     :class="loading && 'pointer-events-none opacity-75'"
+     class="flex items-center justify-center gap-2 w-full bg-green-600 text-white font-semibold rounded-2xl py-4 text-base active:bg-green-700 transition-colors">
+    <svg x-show="!loading" class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    <svg x-show="loading" class="w-5 h-5 shrink-0 animate-spin" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+    </svg>
+    <span x-text="loading ? 'Enviando...' : 'Finalizar Taller'"></span>
+    {% if tiene_finalizacion %}<span class="ml-1 text-xs bg-white text-green-700 rounded-full px-2 py-0.5 font-bold">✓</span>{% endif %}
+  </a>
+</div>
+{% elif mostrar_in and not es_taller and tiene_recepcion %}
 <div class="px-4 pb-2" x-data="{ loading: false }">
   <a href="/planilla/{{ reserva.IdReserva }}/finalizar-reserva"
      @click="loading = true"
@@ -193,7 +235,7 @@
 </div>
 {% endif %}
 
-{% if mostrar_in and tiene_recepcion and tiene_finalizacion %}
+{% if mostrar_in and not es_taller and tiene_recepcion and tiene_finalizacion %}
 <div class="px-4 pb-4">
   <a href="/planilla/{{ reserva.IdReserva }}/comanda?tipo=IN"
      class="flex items-center justify-center gap-2 w-full bg-gray-700 text-white font-semibold rounded-2xl py-4 text-base active:bg-gray-800 transition-colors">

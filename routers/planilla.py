@@ -99,6 +99,12 @@ async def ver(request: Request, id_reserva: int):
 
     tiene_finalizacion = reserva_finalizada(id_reserva)
 
+    es_taller = (
+        "taller" in (reserva.get("SucursalSalida") or "").lower() or
+        "taller" in (reserva.get("SucursalEntrada") or "").lower()
+    )
+    taller_listo = es_taller and tiene_entrega
+
     _vuelo = query("SELECT VueloSalida, VueloEntrada FROM dbo.alquileres WHERE IdReserva = ?", [id_reserva])
     vuelo_salida  = (_vuelo[0].get("VueloSalida")  or "").strip() if _vuelo else ""
     vuelo_entrada = (_vuelo[0].get("VueloEntrada") or "").strip() if _vuelo else ""
@@ -118,6 +124,8 @@ async def ver(request: Request, id_reserva: int):
         "tiene_firma":         tiene_firma,
         "contrato_listo":      contrato_listo,
         "tiene_finalizacion":  tiene_finalizacion,
+        "es_taller":           es_taller,
+        "taller_listo":        taller_listo,
         "envios_count":        envios_count,
         "conductor_data":      _cond[0]  if _cond  else None,
         "adicional_data":      _adic[0]  if _adic  else None,
