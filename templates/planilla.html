@@ -217,7 +217,17 @@
   {% endmacro %}
 
   {{ fila('IdReserva', reserva.IdReserva) }}
+  {% if reserva.NombreCliente %}
+  <div class="flex items-center px-4 py-2.5 border-b border-gray-100">
+    <span class="w-32 shrink-0 text-xs text-gray-400 uppercase tracking-wide">Cliente</span>
+    <a href="/clientes?q={{ reserva.NombreCliente | urlencode }}"
+       class="text-sm font-medium text-blue-600 underline underline-offset-2">
+      {{ reserva.NombreCliente }}
+    </a>
+  </div>
+  {% else %}
   {{ fila('Cliente', reserva.NombreCliente) }}
+  {% endif %}
   {{ fila('Matrícula', reserva.Matricula) }}
   {{ fila('Fecha Salida', reserva.FechaSalida) }}
   {{ fila('Horario Salida', reserva.HorarioSalida) }}
