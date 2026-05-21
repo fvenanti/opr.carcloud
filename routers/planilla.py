@@ -34,7 +34,8 @@ SELECT
     [Estado Pago]             AS EstadoPago,
     abonada                   AS Abonada,
     Adicionales,
-    Observaciones
+    Observaciones,
+    [Observaciones 2]             AS Observaciones2
 FROM dbo.vw_AppSheet_Reservas
 WHERE IdReserva = ?
 """
