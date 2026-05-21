@@ -33,10 +33,23 @@
   <div id="loadbar"><div id="loadbar-inner"></div></div>
   <div id="ptr"><div id="ptr-icon"></div></div>
 
+  {# ── Iniciales usuario ───────────────────────────────────────────────────── #}
+  {% set _nombre = request.session.get('user_nombre', '') %}
+  {% set _partes = _nombre.split() %}
+  {% if _partes | length >= 2 %}{% set _ini = (_partes[0][0] ~ _partes[-1][0]) | upper %}
+  {% elif _partes %}{% set _ini = _partes[0][0] | upper %}
+  {% else %}{% set _ini = 'U' %}{% endif %}
+  {% set _email = request.session.get('user_email', '') %}
+
   {# ── Header ──────────────────────────────────────────────────────────────── #}
   <header class="shrink-0 z-40 bg-white border-b border-gray-100 h-14 flex items-center px-3 shadow-sm">
     <div class="w-10">
-      {% block header_left %}{% endblock %}
+      {% block header_left %}
+      <button @click="$dispatch('abrir-usuario')"
+              class="w-9 h-9 rounded-full bg-primary-600 text-white text-xs font-bold flex items-center justify-center active:bg-primary-700 transition-colors">
+        {{ _ini }}
+      </button>
+      {% endblock %}
     </div>
     <div class="flex-1 text-center font-semibold text-gray-900 truncate px-2">
       {% block header_title %}CarCloud OPR{% endblock %}
@@ -45,6 +58,76 @@
       {% block header_right %}{% endblock %}
     </div>
   </header>
+
+  {# ── Panel de usuario (bottom sheet) ─────────────────────────────────────── #}
+  <div x-data="{ open: false }" @abrir-usuario.window="open = true">
+    <div x-show="open" x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+         @click="open = false"
+         class="fixed inset-0 bg-black/40 z-50" x-cloak></div>
+    <div x-show="open"
+         x-transition:enter="transition ease-out duration-250"
+         x-transition:enter-start="translate-y-full" x-transition:enter-end="translate-y-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="translate-y-0" x-transition:leave-end="translate-y-full"
+         class="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-2xl shadow-2xl" x-cloak>
+
+      {# Drag handle #}
+      <div class="flex justify-center pt-3 pb-1">
+        <div class="w-10 h-1 bg-gray-300 rounded-full"></div>
+      </div>
+
+      {# Usuario #}
+      <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
+        <div class="w-12 h-12 rounded-full bg-primary-600 text-white text-base font-bold flex items-center justify-center shrink-0">
+          {{ _ini }}
+        </div>
+        <div class="min-w-0">
+          <p class="font-semibold text-gray-900 text-sm truncate">{{ _nombre or 'Usuario' }}</p>
+          <p class="text-xs text-gray-400 truncate">{{ _email }}</p>
+        </div>
+      </div>
+
+      {# Historial de versiones #}
+      <div class="px-5 py-4 border-b border-gray-100 max-h-64 overflow-y-auto">
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Historial de versiones</p>
+
+        <div class="space-y-4">
+          <div>
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="text-xs font-bold bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full">v1.0</span>
+              <span class="text-xs text-gray-400">21 may 2026</span>
+            </div>
+            <ul class="text-xs text-gray-600 space-y-0.5 pl-1">
+              <li>· Hojas de ruta con badges de progreso</li>
+              <li>· Planilla de reserva completa (OUT / IN)</li>
+              <li>· Datos de entrega y recepción de vehículo</li>
+              <li>· Contratos, firmas y envío de mail</li>
+              <li>· Modo taller con notificaciones</li>
+              <li>· Gestión de vehículos (alquilados / taller / disponibles)</li>
+              <li>· Lavados</li>
+              <li>· Clientes y reservas</li>
+              <li>· Pull to refresh</li>
+              <li>· Operario por registro independiente</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {# Cerrar sesión #}
+      <div class="px-5 py-4 pb-safe">
+        <a href="/auth/logout"
+           class="flex items-center justify-center gap-2 w-full py-3 rounded-2xl border border-red-200 text-red-600 font-semibold text-sm active:bg-red-50 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+          </svg>
+          Cerrar sesión
+        </a>
+      </div>
+    </div>
+  </div>
 
   {# ── Contenido ────────────────────────────────────────────────────────────── #}
   <main class="flex-1 overflow-y-auto {% block main_class %}pb-4{% endblock %}">
