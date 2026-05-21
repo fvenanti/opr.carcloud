@@ -35,9 +35,11 @@ SELECT
     abonada                   AS Abonada,
     Adicionales,
     Observaciones,
-    [Observaciones 2]             AS Observaciones2
-FROM dbo.vw_AppSheet_Reservas
-WHERE IdReserva = ?
+    [Observaciones 2]             AS Observaciones2,
+    c.[Teléfono]                  AS TelefonoCliente
+FROM dbo.vw_AppSheet_Reservas r
+LEFT JOIN dbo.vw_AppSheet_Clientes c ON c.IdCliente = r.IdCliente
+WHERE r.IdReserva = ?
 """
 
 
