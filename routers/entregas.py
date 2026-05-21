@@ -35,7 +35,11 @@ async def _guardar_foto(file: UploadFile, id_reserva: int, key: str) -> str | No
 async def ver(request: Request, id_reserva: int):
     rows = query("SELECT * FROM entregas WHERE IdReserva = ?", [id_reserva])
     entrega = rows[0] if rows else {}
-    nombre_op = request.session.get("user_nombre", "")
+    if entrega.get("IdOperario"):
+        op = query("SELECT Nombre FROM dbo.tbl_operario WHERE Id = ?", [entrega["IdOperario"]])
+        nombre_op = op[0]["Nombre"] if op else request.session.get("user_nombre", "")
+    else:
+        nombre_op = request.session.get("user_nombre", "")
     return templates.TemplateResponse("entregas.html", {
         "request":    request,
         "id_reserva": id_reserva,
@@ -89,7 +93,7 @@ async def guardar(
                 Auxilio=?, SillaBebe=?,
                 Cadenas=?, GPS=?, Barras=?, PermisoChile=?, KitSeg=?,
                 FotoFrenteIzq=?, FotoFrenteDer=?, FotoTraseraIzq=?,
-                FotoTraseraDer=?, FotoAuxilio=?, Observaciones=?, IdOperario=?
+                FotoTraseraDer=?, FotoAuxilio=?, Observaciones=?
             WHERE IdReserva=?
         """, [
             num("km_salida"), num("nafta_salida"),
@@ -99,7 +103,7 @@ async def guardar(
             foto_paths.get("FotoFrenteIzq"), foto_paths.get("FotoFrenteDer"),
             foto_paths.get("FotoTraseraIzq"), foto_paths.get("FotoTraseraDer"),
             foto_paths.get("FotoAuxilio"),
-            val("observaciones"), id_op, id_reserva,
+            val("observaciones"), id_reserva,
         ])
     else:
         execute("""

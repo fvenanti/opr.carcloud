@@ -58,7 +58,11 @@ async def ver(request: Request, id_reserva: int):
         se = (res[0].get("SucursalEntrada") or "").lower()
         es_taller = "taller" in ss or "taller" in se
 
-    nombre_op = request.session.get("user_nombre", "")
+    if recepcion.get("IdOperario"):
+        op = query("SELECT Nombre FROM dbo.tbl_operario WHERE Id = ?", [recepcion["IdOperario"]])
+        nombre_op = op[0]["Nombre"] if op else request.session.get("user_nombre", "")
+    else:
+        nombre_op = request.session.get("user_nombre", "")
     return templates.TemplateResponse("recepcion.html", {
         "request":       request,
         "id_reserva":    id_reserva,
@@ -120,13 +124,13 @@ async def guardar(
                 KmEntrada=?, NaftaEntrada=?,
                 FotoFrenteIzq=?, FotoFrenteDer=?,
                 FotoTraseraIzq=?, FotoTraseraDer=?,
-                Observaciones=?, IdOperario=?
+                Observaciones=?
             WHERE IdReserva=?
         """, [
             num("km_entrada"), num("nafta_entrada"),
             foto_paths.get("FotoFrenteIzq"), foto_paths.get("FotoFrenteDer"),
             foto_paths.get("FotoTraseraIzq"), foto_paths.get("FotoTraseraDer"),
-            val("observaciones"), id_op, id_reserva,
+            val("observaciones"), id_reserva,
         ])
     else:
         execute("""
