@@ -25,6 +25,8 @@ SELECT
     r.IdReserva,
     r.[Sucursales.Sucursal]  AS SucursalReserva,
     ISNULL(r.Apellido,'') + CASE WHEN r.Nombre IS NOT NULL THEN ', ' + r.Nombre ELSE '' END AS Cliente,
+    r.EstadoReserva,
+    r.TieneMailEnviado,
     nr.ProximaSalida,
     nr.ProximoHorario
 FROM dbo.vw_AppSheet_Vehiculos v
