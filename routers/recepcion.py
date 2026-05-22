@@ -13,6 +13,7 @@ FOTOS = {
     "foto_frente_der": "FotoFrenteDer",
     "foto_trasera_izq": "FotoTraseraIzq",
     "foto_trasera_der": "FotoTraseraDer",
+    "foto_auxilio":    "FotoAuxilio",
 }
 
 
@@ -88,6 +89,7 @@ async def guardar(
     foto_frente_der:  UploadFile = File(None),
     foto_trasera_izq: UploadFile = File(None),
     foto_trasera_der: UploadFile = File(None),
+    foto_auxilio:     UploadFile = File(None),
 ):
     form = dict(await request.form())
     id_op = request.session.get("id_operario", 0)
@@ -104,10 +106,11 @@ async def guardar(
         "foto_frente_der":  foto_frente_der,
         "foto_trasera_izq": foto_trasera_izq,
         "foto_trasera_der": foto_trasera_der,
+        "foto_auxilio":     foto_auxilio,
     }
 
     existing = query(
-        "SELECT Id, FotoFrenteIzq, FotoFrenteDer, FotoTraseraIzq, FotoTraseraDer FROM recepciones WHERE IdReserva = ?",
+        "SELECT Id, FotoFrenteIzq, FotoFrenteDer, FotoTraseraIzq, FotoTraseraDer, FotoAuxilio FROM recepciones WHERE IdReserva = ?",
         [id_reserva],
     )
 
@@ -126,27 +129,27 @@ async def guardar(
                 KmEntrada=?, NaftaEntrada=?,
                 FotoFrenteIzq=?, FotoFrenteDer=?,
                 FotoTraseraIzq=?, FotoTraseraDer=?,
-                Observaciones=?
+                FotoAuxilio=?, Observaciones=?
             WHERE IdReserva=?
         """, [
             num("km_entrada"), num("nafta_entrada"),
             foto_paths.get("FotoFrenteIzq"), foto_paths.get("FotoFrenteDer"),
             foto_paths.get("FotoTraseraIzq"), foto_paths.get("FotoTraseraDer"),
-            val("observaciones"), id_reserva,
+            foto_paths.get("FotoAuxilio"), val("observaciones"), id_reserva,
         ])
     else:
         execute("""
             INSERT INTO recepciones
                 (IdReserva, IdOperario, KmEntrada, NaftaEntrada,
                  FotoFrenteIzq, FotoFrenteDer, FotoTraseraIzq, FotoTraseraDer,
-                 Observaciones)
-            VALUES (?,?,?,?,?,?,?,?,?)
+                 FotoAuxilio, Observaciones)
+            VALUES (?,?,?,?,?,?,?,?,?,?)
         """, [
             id_reserva, id_op,
             num("km_entrada"), num("nafta_entrada"),
             foto_paths.get("FotoFrenteIzq"), foto_paths.get("FotoFrenteDer"),
             foto_paths.get("FotoTraseraIzq"), foto_paths.get("FotoTraseraDer"),
-            val("observaciones"),
+            foto_paths.get("FotoAuxilio"), val("observaciones"),
         ])
 
     return RedirectResponse(f"/planilla/{id_reserva}?ok=recepcion", status_code=303)
