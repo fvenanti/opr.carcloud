@@ -45,7 +45,7 @@
   <header class="shrink-0 z-40 bg-white border-b border-gray-100 h-14 flex items-center px-3 shadow-sm">
     <div class="w-10">
       {% block header_left %}
-      <button @click="$dispatch('abrir-usuario')"
+      <button onclick="window.dispatchEvent(new CustomEvent('abrir-usuario'))"
               class="w-9 h-9 rounded-full bg-primary-600 text-white text-xs font-bold flex items-center justify-center active:bg-primary-700 transition-colors">
         {{ _ini }}
       </button>
