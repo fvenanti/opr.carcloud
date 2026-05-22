@@ -214,9 +214,12 @@
         start();
       });
       document.addEventListener('submit', function(e) {
-        start();
         var btn = e.target.querySelector('[type=submit]:not([data-no-spin])');
-        if (btn && !btn.disabled) { btn.disabled = true; btn.style.opacity = '0.65'; }
+        setTimeout(function() {
+          if (e.defaultPrevented) { return; }
+          start();
+          if (btn && !btn.disabled) { btn.disabled = true; btn.style.opacity = '0.65'; }
+        }, 0);
       });
       window.addEventListener('pageshow', done);
     })();
