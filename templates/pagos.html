@@ -21,7 +21,7 @@
   <div class="px-4 py-3 flex items-start justify-between gap-2">
     <div class="flex-1 min-w-0">
       <p class="text-sm font-semibold text-gray-900">
-        $ {{ "%.0f"|format(p.Importe) }} {{ p.Moneda }}
+        {{ 'US$' if 'olar' in (p.Moneda or '') else '$' }} {{ "{:,.0f}".format(p.Importe).replace(",", ".") }}
       </p>
       <p class="text-xs text-gray-500">{{ p.Concepto }} · {{ p.TipoPago }} · {{ p.FechaPago }}</p>
       {% if p.Observaciones %}<p class="text-xs text-gray-400 truncate">{{ p.Observaciones }}</p>{% endif %}
