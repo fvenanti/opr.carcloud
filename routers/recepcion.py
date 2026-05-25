@@ -65,10 +65,18 @@ async def ver(request: Request, id_reserva: int):
         nombre_op = op[0]["Nombre"] if op else request.session.get("user_nombre", "")
     else:
         nombre_op = request.session.get("user_nombre", "")
+
+    ent = query(
+        "SELECT FotoFrenteIzq, FotoFrenteDer, FotoTraseraIzq, FotoTraseraDer, FotoAuxilio FROM entregas WHERE IdReserva = ?",
+        [id_reserva],
+    )
+    entrega = ent[0] if ent else {}
+
     return templates.TemplateResponse("recepcion.html", {
         "request":       request,
         "id_reserva":    id_reserva,
         "recepcion":     recepcion,
+        "entrega":       entrega,
         "nombre_op":     nombre_op,
         "km_salida":     km_salida,
         "nafta_salida":  nafta_salida,

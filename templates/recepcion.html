@@ -14,17 +14,25 @@
 
 {% block content %}
 
-{% macro foto_field(label, name, existing_url) %}
+{% macro foto_field(label, name, existing_url, entrega_url=None) %}
 <div x-data="{ preview: null }"
      {% if not existing_url %}data-foto-req="{{ label }}"{% endif %}>
   <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">
     {{ label }}{% if not existing_url %} <span class="text-red-500">*</span>{% endif %}
   </label>
+  {% if entrega_url %}
+  <div class="mb-2 rounded-xl overflow-hidden border border-blue-200">
+    <div class="bg-blue-50 px-3 py-1 text-[10px] font-bold text-blue-700 uppercase tracking-wide">Salida (entrega)</div>
+    <img src="{{ entrega_url }}" class="w-full h-40 object-cover" alt="{{ label }} — entrega">
+  </div>
+  {% endif %}
   <div x-show="preview" class="mb-2 rounded-xl overflow-hidden border border-green-200">
+    <div class="bg-green-50 px-3 py-1 text-[10px] font-bold text-green-700 uppercase tracking-wide">Entrada (recepción)</div>
     <img :src="preview" class="w-full h-40 object-cover" alt="{{ label }}">
   </div>
   {% if existing_url %}
   <div x-show="!preview" class="mb-2 rounded-xl overflow-hidden border border-gray-100">
+    <div class="bg-gray-50 px-3 py-1 text-[10px] font-bold text-gray-600 uppercase tracking-wide">Entrada (recepción)</div>
     <img src="{{ existing_url }}" class="w-full h-40 object-cover" alt="{{ label }}">
   </div>
   {% endif %}
@@ -135,11 +143,11 @@
 
   <div class="space-y-4 pt-2">
     <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest">Fotos del vehículo</h3>
-    {{ foto_field('Frente Izquierdo', 'foto_frente_izq', recepcion.FotoFrenteIzq) }}
-    {{ foto_field('Frente Derecho',   'foto_frente_der', recepcion.FotoFrenteDer) }}
-    {{ foto_field('Trasera Izquierda','foto_trasera_izq', recepcion.FotoTraseraIzq) }}
-    {{ foto_field('Trasera Derecha',  'foto_trasera_der', recepcion.FotoTraseraDer) }}
-    {{ foto_field('Auxilio',          'foto_auxilio',     recepcion.FotoAuxilio) }}
+    {{ foto_field('Frente Izquierdo', 'foto_frente_izq', recepcion.FotoFrenteIzq, entrega.FotoFrenteIzq) }}
+    {{ foto_field('Frente Derecho',   'foto_frente_der', recepcion.FotoFrenteDer, entrega.FotoFrenteDer) }}
+    {{ foto_field('Trasera Izquierda','foto_trasera_izq', recepcion.FotoTraseraIzq, entrega.FotoTraseraIzq) }}
+    {{ foto_field('Trasera Derecha',  'foto_trasera_der', recepcion.FotoTraseraDer, entrega.FotoTraseraDer) }}
+    {{ foto_field('Auxilio',          'foto_auxilio',     recepcion.FotoAuxilio,   entrega.FotoAuxilio) }}
   </div>
 
   <div>
