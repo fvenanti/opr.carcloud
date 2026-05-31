@@ -50,7 +50,7 @@
       <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"/>
     </svg>
     <span class="text-sm font-medium" x-text="preview ? '✓ Foto lista — tocar para cambiar' : '{{ 'Cambiar foto' if existing_url else 'Tomar foto' }}'"></span>
-    <input type="file" name="{{ name }}" accept="image/*" capture="environment" class="hidden"
+    <input type="file" name="{{ name }}" accept="image/*" class="hidden"
            @change="preview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null">
   </label>
 </div>
