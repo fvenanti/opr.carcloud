@@ -1,7 +1,8 @@
-import os
+import os, re
 from dotenv import load_dotenv
 load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
 
+import pyodbc
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -38,6 +39,49 @@ app.include_router(vehiculos.router,  prefix="/vehiculos",  tags=["Vehiculos"])
 app.include_router(lavados.router,    prefix="/lavados",    tags=["Lavados"])
 app.include_router(clientes.router,   prefix="/clientes",   tags=["Clientes"])
 app.include_router(reservas.router,   prefix="/reservas",   tags=["Reservas"])
+
+# ── Manejo global de errores de truncamiento de SQL Server ────────────────────
+_COL_LABELS = {
+    "Telefono": "Teléfono", "Mail": "Mail", "Domicilio": "Domicilio",
+    "Nombre": "Nombre", "Apellido": "Apellido",
+    "DniTipo": "DNI Tipo", "DniNumero": "DNI Número",
+    "NumeroLicencia": "Número de Licencia", "EmitidaPor": "Emitida por",
+    "Categoria": "Categoría", "Observaciones": "Observaciones",
+    "Concepto": "Concepto", "TipoPago": "Tipo de Pago", "Moneda": "Moneda",
+}
+
+@app.exception_handler(pyodbc.ProgrammingError)
+async def handle_pyodbc_error(request: Request, exc: pyodbc.ProgrammingError):
+    msg = str(exc)
+    if "would be truncated" not in msg:
+        raise exc
+    col_m = re.search(r"column '([^']+)'", msg)
+    val_m = re.search(r"Truncated value:\s*'([^']*)'", msg)
+    col   = col_m.group(1) if col_m else "un campo"
+    label = _COL_LABELS.get(col, col)
+    val   = (val_m.group(1) if val_m else "")
+    extra = f'<br><span class="text-gray-500 text-sm">Valor: "{val}"</span>' if val else ""
+    html = f"""<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Campo muy largo</title>
+<script src="https://cdn.tailwindcss.com"></script></head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+<div class="bg-white rounded-2xl shadow-lg max-w-md w-full p-6 text-center">
+  <div class="w-16 h-16 mx-auto bg-red-50 rounded-full flex items-center justify-center mb-4">
+    <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+  </div>
+  <h1 class="text-lg font-bold text-gray-900 mb-2">Campo demasiado largo</h1>
+  <p class="text-gray-700 text-sm mb-1">El campo <strong>"{label}"</strong> excede el tamaño máximo permitido.</p>
+  {extra}
+  <p class="text-gray-600 text-sm mt-4">Volvé atrás, acortá ese campo y guardá de nuevo.</p>
+  <button onclick="history.back()" class="mt-6 w-full bg-red-600 text-white font-semibold rounded-xl py-3 active:bg-red-700">
+    Volver
+  </button>
+</div></body></html>"""
+    return HTMLResponse(html, status_code=400)
+
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
