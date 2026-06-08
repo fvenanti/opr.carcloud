@@ -44,7 +44,7 @@
     </svg>
     <span class="text-sm font-medium" x-text="preview ? '✓ Foto lista — tocar para cambiar' : '{{ 'Cambiar foto' if existing_url else 'Tomar foto' }}'"></span>
     <input type="file" name="{{ name }}" accept="image/*" class="hidden"
-           @change="preview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null">
+           @change="preview = await window.resizeFotoInput($event.target)">
   </label>
 </div>
 {% endmacro %}
