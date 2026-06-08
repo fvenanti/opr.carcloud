@@ -35,12 +35,16 @@
   <label class="block text-xs text-gray-500 mb-1 uppercase tracking-wide">
     {{ label }}{% if not existing_url %} <span class="text-red-500">*</span>{% endif %}
   </label>
-  <div x-show="preview" class="mb-2 rounded-xl overflow-hidden border border-green-200">
-    <img :src="preview" class="w-full h-40 object-cover" alt="{{ label }}">
+  <div x-show="preview" class="mb-2 rounded-xl overflow-hidden border border-green-200 bg-gray-50">
+    <img :src="preview" class="w-full max-h-72 object-contain cursor-pointer"
+         alt="{{ label }}"
+         @click="window.dispatchEvent(new CustomEvent('abrir-foto', {detail: preview}))">
   </div>
   {% if existing_url %}
-  <div x-show="!preview" class="mb-2 rounded-xl overflow-hidden border border-gray-100">
-    <img src="{{ existing_url }}" class="w-full h-40 object-cover" alt="{{ label }}">
+  <div x-show="!preview" class="mb-2 rounded-xl overflow-hidden border border-gray-100 bg-gray-50">
+    <img src="{{ existing_url }}" class="w-full max-h-72 object-contain cursor-pointer"
+         alt="{{ label }}"
+         @click="window.dispatchEvent(new CustomEvent('abrir-foto', {detail: '{{ existing_url }}'}))">
   </div>
   {% endif %}
   <label :class="preview ? 'border-green-400 bg-green-50 text-green-700' : ({% if not existing_url %}fotoError{% else %}false{% endif %} ? 'border-red-400 bg-red-50 text-red-600' : 'border-gray-200 bg-white text-gray-500')"

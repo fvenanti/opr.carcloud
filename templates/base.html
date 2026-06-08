@@ -282,5 +282,23 @@
     })();
   </script>
   {% block scripts %}{% endblock %}
+
+  <!-- Lightbox para abrir fotos en pantalla completa -->
+  <div x-data="{ url: '' }"
+       x-show="url"
+       x-cloak
+       @abrir-foto.window="url = $event.detail"
+       @click="url = ''"
+       @keydown.escape.window="url = ''"
+       class="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4"
+       style="touch-action: pinch-zoom;">
+    <img :src="url" class="max-w-full max-h-full object-contain" alt="Foto">
+    <button @click.stop="url = ''"
+            class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 text-white flex items-center justify-center active:bg-white/30">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
 </body>
 </html>
