@@ -22,7 +22,8 @@ jobs:
           port:     22
           script_stop: true
           script: |
-            cd /home/ubuntu/opr || exit 1
-            git pull --ff-only origin dev || exit 1
-            docker compose up -d --build 2>&1 | tail -5
+            set -euo pipefail
+            cd /home/ubuntu/opr
+            git pull --ff-only origin dev
+            docker compose up -d --build
             docker ps --filter name=carcloud-opr --format 'table {{.Names}}\t{{.Status}}'

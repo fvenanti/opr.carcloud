@@ -1,0 +1,12 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+uploads/
+.DS_Store
+*.egg-info/
+dist/
+.claude/
+.git/
+.github/
+extract_docx.py
