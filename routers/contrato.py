@@ -576,12 +576,16 @@ async def confirmar(request: Request, id_reserva: int):
     if cond:
         client_email = cond[0].get("Mail") or ""
         client_name  = f"{cond[0].get('Nombre') or ''} {cond[0].get('Apellido') or ''}".strip()
+
+    pdf_url = f"/uploads/{id_reserva}/contrato_{id_reserva}.pdf" if os.path.isfile(contrato_pdf_path(id_reserva)) else None
+
     return templates.TemplateResponse("enviar_contrato.html", {
         "request":      request,
         "id_reserva":   id_reserva,
         "client_email": client_email,
         "client_name":  client_name,
         "historial":    _historial_envios(id_reserva),
+        "pdf_url":      pdf_url,
         "ok":           request.query_params.get("ok"),
         "error":        request.query_params.get("error"),
     })
