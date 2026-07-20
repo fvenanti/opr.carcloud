@@ -5,7 +5,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email import encoders
-from utils import ahora_arg
+from utils import ahora_arg, matricula_display
 
 from docx import Document
 from docx.shared import Inches
@@ -147,8 +147,8 @@ def _build_context(id_reserva: int) -> dict:
             abonada
         FROM dbo.vw_AppSheet_Reservas WHERE IdReserva = ?
     """, [id_reserva])
-    # Matrícula cruda tal como está en la base. ctx["MATRICULA"] lleva el prefijo
-    # "A" sólo para mostrar en el contrato, y no sirve para buscar en otras vistas.
+    # Matrícula cruda tal como está en la base. ctx["MATRICULA"] es la versión
+    # para mostrar, y no sirve para buscar en otras vistas.
     matricula_raw = ""
     if res:
         r = res[0]
@@ -156,7 +156,7 @@ def _build_context(id_reserva: int) -> dict:
         matricula_raw = r.get("MATRICULA") or ""
         ctx["abonada"] = "Y" if r.get("abonada") else "N"
         ctx.update({
-            "MATRICULA":           "A" + matricula_raw if matricula_raw else "",
+            "MATRICULA":           matricula_display(matricula_raw),
             "Horario Salida":      _fmt_time(r.get("HorarioSalida")),
             "Fecha Salida":        _fmt_date(r.get("FechaSalida")),
             "Lugar Salida":        r.get("LugarSalida") or "",
