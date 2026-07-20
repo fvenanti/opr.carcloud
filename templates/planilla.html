@@ -15,7 +15,7 @@
   <div class="text-4xl font-black text-gray-900 tracking-tight">
     {{ tipo }}
   </div>
-  <div class="text-2xl font-bold text-gray-700 mt-1">{{ reserva.Matricula }}</div>
+  <div class="text-2xl font-bold text-gray-700 mt-1">{{ reserva.MATRICULA | matricula }}</div>
 </div>
 
 <!-- Botones de acción -->
@@ -280,7 +280,7 @@
   {% else %}
   {{ fila('Cliente', reserva.NombreCliente) }}
   {% endif %}
-  {{ fila('Matrícula', reserva.Matricula) }}
+  {{ fila('Matrícula', reserva.MATRICULA | matricula) }}
   {{ fila('Fecha Salida', reserva.FechaSalida) }}
   {{ fila('Horario Salida', reserva.HorarioSalida) }}
   {{ fila('Lugar Salida', reserva.LugarSalida) }}
