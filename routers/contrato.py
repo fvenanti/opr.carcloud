@@ -147,12 +147,16 @@ def _build_context(id_reserva: int) -> dict:
             abonada
         FROM dbo.vw_AppSheet_Reservas WHERE IdReserva = ?
     """, [id_reserva])
+    # Matrícula cruda tal como está en la base. ctx["MATRICULA"] lleva el prefijo
+    # "A" sólo para mostrar en el contrato, y no sirve para buscar en otras vistas.
+    matricula_raw = ""
     if res:
         r = res[0]
         moneda = r.get("MonedaDesc") or "Pesos"
+        matricula_raw = r.get("MATRICULA") or ""
         ctx["abonada"] = "Y" if r.get("abonada") else "N"
         ctx.update({
-            "MATRICULA":           "A" + r.get("MATRICULA") if r.get("MATRICULA") else "",
+            "MATRICULA":           "A" + matricula_raw if matricula_raw else "",
             "Horario Salida":      _fmt_time(r.get("HorarioSalida")),
             "Fecha Salida":        _fmt_date(r.get("FechaSalida")),
             "Lugar Salida":        r.get("LugarSalida") or "",
@@ -183,11 +187,11 @@ def _build_context(id_reserva: int) -> dict:
         ctx["Extras"]          = _fmt_importe(m.get("Extras"), moneda)
 
     # Vehículo
-    if ctx.get("MATRICULA"):
+    if matricula_raw:
         veh = query("""
             SELECT Marca, Modelo, COMBUSTIBLE, CuartoTanque, Espera
             FROM dbo.vw_AppSheet_Vehiculos WHERE MATRICULA = ?
-        """, [ctx["MATRICULA"]])
+        """, [matricula_raw])
         if veh:
             v = veh[0]
             moneda = ctx.get("Monedas.Descripcion", "Pesos")
