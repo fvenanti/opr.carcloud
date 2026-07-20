@@ -19,6 +19,56 @@ def matricula_display(matricula) -> str:
     return "A" + m if _PATENTE_SIN_A.match(m) else m
 
 
+# Separadores usados cuando hay más de un teléfono en el mismo campo
+_SEPARADORES = re.compile(r"\s*[/;,]\s*|\s+-\s+")
+
+
+def _normalizar_telefono(candidato: str) -> str:
+    """Devuelve el número en formato internacional (sólo dígitos) o "".
+
+    Ante la duda devuelve "", porque un número mal armado abre un chat de
+    WhatsApp con un desconocido y eso es peor que no ofrecer el botón.
+    """
+    internacional = "+" in candidato
+    d = re.sub(r"\D", "", candidato)
+    if not d:
+        return ""
+
+    # Ya trae código de país explícito
+    if internacional:
+        return d if 8 <= len(d) <= 15 and not d.startswith("0") else ""
+
+    # Argentina con código de país pero sin el 9 de celular
+    if d.startswith("549") and len(d) == 13:
+        return d
+    if d.startswith("54") and len(d) == 12:
+        return "549" + d[2:]
+
+    d = d.lstrip("0")
+
+    # Formato nacional con el 15 intercalado: área (2-4 díg) + 15 + abonado
+    if len(d) == 12:
+        for a in (2, 3, 4):
+            if d[a:a + 2] == "15":
+                d = d[:a] + d[a + 2:]
+                break
+
+    # Área + abonado siempre suman 10 dígitos en Argentina
+    return "549" + d if len(d) == 10 else ""
+
+
+def whatsapp_link(telefono) -> str:
+    """URL de wa.me para el teléfono, o "" si no se puede normalizar con certeza."""
+    raw = (telefono or "").strip()
+    if not raw:
+        return ""
+    for parte in _SEPARADORES.split(raw):
+        num = _normalizar_telefono(parte)
+        if num:
+            return "https://wa.me/" + num
+    return ""
+
+
 def ahora_arg() -> datetime:
     return datetime.now(_TZ)
 

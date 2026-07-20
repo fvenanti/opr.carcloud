@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_iconos.html" import whatsapp as icono_whatsapp %}
 {% block title %}Clientes{% endblock %}
 {% block header_title %}CLIENTES{% endblock %}
 
@@ -39,7 +40,14 @@
         <span class="text-xs text-gray-500">DNI {{ c.DNI }}</span>
         {% endif %}
         {% if c.Telefono %}
-        <a href="tel:{{ c.Telefono }}" class="text-xs text-blue-600">{{ c.Telefono }}</a>
+        <span class="inline-flex items-center gap-1.5">
+          <a href="tel:{{ c.Telefono }}" class="text-xs text-blue-600">{{ c.Telefono }}</a>
+          {% set wa = c.Telefono | whatsapp %}
+          {% if wa %}
+          <a href="{{ wa }}" target="_blank" rel="noopener" aria-label="Enviar WhatsApp"
+             class="text-[#25D366] active:opacity-60">{{ icono_whatsapp('w-4 h-4') }}</a>
+          {% endif %}
+        </span>
         {% endif %}
         {% if c.Mail %}
         <a href="mailto:{{ c.Mail }}" class="text-xs text-blue-600 truncate max-w-[200px]">{{ c.Mail }}</a>
