@@ -11,7 +11,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from routers import auth, hojas_ruta, planilla, conductor, adicionales, pagos, entregas, firmas, recepcion, contrato, comanda, finalizar, vehiculos, clientes, reservas, vuelos, lavados, taller
 import uvicorn
 
-app = FastAPI(title="CarCloud OPR", version="1.0")
+app = FastAPI(title="CarCloud OPR", version="1.2")
 
 BASE = os.path.dirname(__file__)
 app.mount("/static", StaticFiles(directory=os.path.join(BASE, "static")), name="static")
