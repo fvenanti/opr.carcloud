@@ -301,8 +301,8 @@
   {{ fila('Moneda', reserva.Moneda) }}
   {{ fila('Días', reserva.Dias) }}
   {{ fila('Km incluidos', reserva.Km) }}
-  {{ fila('Franquicia Menor', reserva.FranquiciaMenor) }}
-  {{ fila('Franquicia Mayor', reserva.FranquiciaMayor) }}
+  {{ fila('Franquicia Menor', reserva.FranquiciaChoque | importe(reserva.Moneda)) }}
+  {{ fila('Franquicia Mayor', reserva.FranquiciaVuelco | importe(reserva.Moneda)) }}
   {{ fila('Km Adicional', reserva.KmAdicional) }}
   {{ fila('Adicionales', reserva.Adicionales) }}
   {{ fila('Observaciones', reserva.Observaciones) }}

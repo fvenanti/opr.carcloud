@@ -5,7 +5,13 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email import encoders
-from utils import ahora_arg, matricula_display
+from utils import (
+    ahora_arg,
+    matricula_display,
+    simbolo_moneda as _currency_symbol,
+    fmt_num as _fmt_num,
+    fmt_importe as _fmt_importe,
+)
 
 from docx import Document
 from docx.shared import Inches
@@ -82,36 +88,6 @@ def _fmt_time(val) -> str:
 
 def _yn(val) -> str:
     return "SI" if val in (1, True, "1", "Y", "y") else "NO"
-
-
-def _currency_symbol(moneda: str) -> str:
-    m = (moneda or "").strip().lower()
-    if "dolar" in m or "usd" in m or "dollar" in m:
-        return "US$"
-    return "$"
-
-
-def _fmt_num(val) -> str:
-    """Número sin decimales y sin símbolo de moneda (cuando el template ya tiene el $)."""
-    if val is None or val == "":
-        return ""
-    try:
-        return f"{int(round(float(val))):,}".replace(",", ".")
-    except (ValueError, TypeError):
-        return str(val)
-
-
-def _fmt_importe(val, moneda: str = "Pesos") -> str:
-    """Formatea un importe sin decimales con símbolo de moneda. Ej: $ 483.360"""
-    if val is None or val == "":
-        return ""
-    try:
-        amount = int(round(float(val)))
-        symbol = _currency_symbol(moneda)
-        formatted = f"{amount:,}".replace(",", ".")   # formato argentino
-        return f"{symbol} {formatted}"
-    except (ValueError, TypeError):
-        return str(val)
 
 
 def _disk_path(url_path: str) -> str:

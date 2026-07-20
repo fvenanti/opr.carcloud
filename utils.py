@@ -69,6 +69,35 @@ def whatsapp_link(telefono) -> str:
     return ""
 
 
+def simbolo_moneda(moneda: str) -> str:
+    m = (moneda or "").strip().lower()
+    if "dolar" in m or "usd" in m or "dollar" in m:
+        return "US$"
+    return "$"
+
+
+def fmt_num(val) -> str:
+    """Número sin decimales y sin símbolo de moneda (cuando el template ya tiene el $)."""
+    if val is None or val == "":
+        return ""
+    try:
+        return f"{int(round(float(val))):,}".replace(",", ".")
+    except (ValueError, TypeError):
+        return str(val)
+
+
+def fmt_importe(val, moneda: str = "Pesos") -> str:
+    """Formatea un importe sin decimales con símbolo de moneda. Ej: $ 483.360"""
+    if val is None or val == "":
+        return ""
+    try:
+        amount = int(round(float(val)))
+        formatted = f"{amount:,}".replace(",", ".")   # formato argentino
+        return f"{simbolo_moneda(moneda)} {formatted}"
+    except (ValueError, TypeError):
+        return str(val)
+
+
 def ahora_arg() -> datetime:
     return datetime.now(_TZ)
 
