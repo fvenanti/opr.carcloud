@@ -4,6 +4,11 @@ services:
     container_name: carcloud-opr
     restart: always
     network_mode: host          # accede a localhost:1433 directamente
+    # LibreOffice necesita ~480 MB para convertir el contrato a PDF; con menos,
+    # el cgroup lo mata (OOM) y el envío falla. 300 MB de RAM + swap hasta 900 MB
+    # cubren el pico breve de la conversión sin reservar esa RAM de forma fija.
+    mem_limit: 300m
+    memswap_limit: 900m
     env_file:
       - .env
     volumes:
