@@ -97,9 +97,11 @@ RUTAS_PUBLICAS = {"/login", "/auth/google", "/auth/callback", "/favicon.ico"}
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
+        # OJO: /uploads NO va aca. Sirve contratos en PDF con datos de tarjeta
+        # del cliente, y sin este chequeo quedan descargables por cualquiera
+        # con solo adivinar el IdReserva.
         if (path in RUTAS_PUBLICAS
-                or path.startswith("/static")
-                or path.startswith("/uploads")):
+                or path.startswith("/static")):
             return await call_next(request)
         if not request.session.get("user_email"):
             request.session["next_url"] = path
